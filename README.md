@@ -1,4 +1,4 @@
-Template Service
+Service Oncoanalyser Wgts Both Pipeline Manager
 ================================================================================
 
 - [Template Service](#template-service)
@@ -31,8 +31,18 @@ Template Service
   - [Glossary \& References](#glossary--references)
 
 
-Service Description
+Description
 --------------------------------------------------------------------------------
+
+### Summary
+
+This is the Oncoanalyser WGTS DNA/RNA Pipeline management service, respoible for orchestrating the execution of the
+combined DNA/RNA pipeline for the Oncoanalyser WGTS service.
+
+This pipeline consumed inputs from both Oncoanalyser DNA and Oncoanalyser RNA services, and produces a combined output
+by running the steps lilac, neo, cuppa and orange which require DNA + RNA inputs.
+
+
 
 ### Name & responsibility
 
@@ -72,6 +82,61 @@ E.g. Manual tagging of git commits following Semantic Versioning (semver) guidel
 #### Release management
 
 The service employs a fully automated CI/CD pipeline that automatically builds and releases all changes to the `main` code branch.
+
+
+### Running the pipeline
+
+tags:
+  * tumorDnaLibraryId:
+  * normalDnaLibraryId:
+  * tumorRnaLibraryId:
+  * subjectId:
+  * individualId:
+  * fastqRgidList: []
+
+
+inputs:
+* processesList:
+  * lilac
+  * neo
+  * cuppa
+  * orange
+* genome: "GRCh38_umccr"
+* genomeVersion: "GRCh38"
+* genomeType: "alt"
+* forceGenome: true
+* refDataHmfDataPath: "s3://hmf-data/GRCh38_umccr"
+* genomes
+  * GRCh38_umccr:
+    * fasta
+    * fai
+    * dict
+    * img
+    * bwamem2Index
+    * gridssIndex
+    * starIndex
+* tumorDnaInputs:
+  * bamRedux
+  * reduxJitterTsv
+  * reduxMsTsv
+  * bamtoolsDir
+  * sageDir
+  * linxAnnoDir
+  * linxPlotDir
+  * purpleDir
+  * virusinterpreterDir
+  * chordDir
+  * sigsDir
+* normalDnaInputs:
+  * bamRedux
+  * reduxJitterTsv
+  * reduxMsTsv
+  * bamtoolsDir
+  * sageDir
+  * linxAnnoDir
+* tumorRnaInputs:
+  * bam
+  * isofoxDir
 
 
 Infrastructure & Deployment
