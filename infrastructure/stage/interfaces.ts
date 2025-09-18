@@ -28,10 +28,13 @@ export interface StatelessApplicationStackConfig {
 
   // Workflow manager stuff
   isNewWorkflowManagerDeployed: boolean;
+
+  // SSM Parameter pathsd
+  ssmParameterPaths: SsmParameterPaths;
 }
 
 /* Set versions */
-export type VersionType = '2.0.0' | '2.1.0';
+export type VersionType = '2.0.0' | '2.1.0' | '2.2.0';
 
 /* Set genomes */
 export type GenomeType = 'GRCh38_umccr' | 'GRCh38_hmf';
@@ -43,7 +46,7 @@ export interface Genome {
   fai: string;
   dict: string;
   img: string;
-  bwamem2_index: string;
-  gridss_index: string;
-  star_index: string;
+  bwamem2Index: string;
+  gridssIndex: string;
+  starIndex: string;
 }

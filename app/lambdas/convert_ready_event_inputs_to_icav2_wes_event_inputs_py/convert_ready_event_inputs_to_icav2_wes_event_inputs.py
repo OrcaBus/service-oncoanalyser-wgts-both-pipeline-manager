@@ -329,6 +329,7 @@ TUMOR_RNA_INPUT_PARAMS = [
     "isofoxDir",
 ]
 
+
 def convert_params_to_samplesheet_row(
         group_id: str,
         subject_id: str,
@@ -505,7 +506,7 @@ def convert_ready_event_inputs_to_icav2_wes_event_inputs(
     return dict(filter(
         lambda kv_iter_: kv_iter_[1] is not None,
         {
-            "mode": DEFAULT_MODE,
+            "mode": inputs.get("mode", DEFAULT_MODE),
             "monochrome_logs": inputs.get("monochromeLogs", DEFAULT_MONOCHROME_LOGS),
             "samplesheet": samplesheet,
             "genome": inputs.get("genome", DEFAULT_GENOME),
