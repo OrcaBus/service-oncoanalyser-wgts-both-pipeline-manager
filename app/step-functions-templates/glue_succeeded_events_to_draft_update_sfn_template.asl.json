@@ -50,7 +50,7 @@
       "Arguments": {
         "FunctionName": "${__find_latest_workflow_lambda_function_arn__}",
         "Payload": {
-          "workflowName": "${__oncoanalyser_wgts_both_workflow_name__}",
+          "workflowName": "${__workflow_name__}",
           "libraries": "{% $libraries %}",
           "analysisRunId": "{% $analysisRunId %}",
           "status": "${__draft_status__}"

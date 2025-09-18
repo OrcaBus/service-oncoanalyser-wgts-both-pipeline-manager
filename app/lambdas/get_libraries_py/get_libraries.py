@@ -30,29 +30,38 @@ def handler(event, context):
         libraries
     ))
 
-    tumor_dna_library_obj = next(filter(
-        lambda library_iter_: (
-                library_iter_['phenotype'] == 'tumor' and
-                library_iter_['type'] == 'WGS'
-        ),
-        library_obj_list
-    ))
+    try:
+        tumor_dna_library_obj = next(filter(
+            lambda library_iter_: (
+                    library_iter_['phenotype'] == 'tumor' and
+                    library_iter_['type'] == 'WGS'
+            ),
+            library_obj_list
+        ))
+    except StopIteration:
+        raise ValueError("Could not get tumor DNA library with WGS type from the provided libraries")
 
-    normal_dna_library_obj = next(filter(
-        lambda library_iter_: (
-                library_iter_['phenotype'] == 'normal' and
-                library_iter_['type'] == 'WGS'
-        ),
-        library_obj_list
-    ))
+    try:
+        normal_dna_library_obj = next(filter(
+            lambda library_iter_: (
+                    library_iter_['phenotype'] == 'normal' and
+                    library_iter_['type'] == 'WGS'
+            ),
+            library_obj_list
+        ))
+    except StopIteration:
+        raise ValueError("Could not get normal DNA library with WGS type from the provided libraries")
 
-    tumor_rna_library_obj = next(filter(
-        lambda library_iter_: (
-                library_iter_['phenotype'] == 'tumor' and
-                library_iter_['type'] == 'WTS'
-        ),
-        library_obj_list
-    ))
+    try:
+        tumor_rna_library_obj = next(filter(
+            lambda library_iter_: (
+                    library_iter_['phenotype'] == 'tumor' and
+                    library_iter_['type'] == 'WTS'
+            ),
+            library_obj_list
+        ))
+    except StopIteration:
+        raise ValueError("Could not get tumor RNA library with WTS type from the provided libraries")
 
     # If both libraries are provided, return their IDs
     return {

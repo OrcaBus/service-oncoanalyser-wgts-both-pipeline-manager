@@ -24,6 +24,7 @@ import {
   STACK_PREFIX,
   STEP_FUNCTIONS_DIR,
   SUCCEEDED_STATUS,
+  WORKFLOW_NAME,
   WORKFLOW_RUN_STATE_CHANGE_DETAIL_TYPE,
   WORKFLOW_RUN_UPDATE_DETAIL_TYPE,
 } from '../constants';
@@ -59,6 +60,8 @@ function createStateMachineDefinitionSubstitutions(props: BuildStepFunctionProps
   definitionSubstitutions['__oncoanalyser_wgts_rna_workflow_name__'] =
     ONCOANALYSER_WGTS_RNA_WORKFLOW_NAME;
   definitionSubstitutions['__default_payload_version__'] = DEFAULT_PAYLOAD_VERSION;
+  // Stack workflow name
+  definitionSubstitutions['__workflow_name__'] = WORKFLOW_NAME;
 
   /* Sfn Requirements */
   if (sfnRequirements.needsEventPutPermission) {
