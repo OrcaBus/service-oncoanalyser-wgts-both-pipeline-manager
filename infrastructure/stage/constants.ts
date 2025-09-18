@@ -2,6 +2,7 @@
 import path from 'path';
 import { StageName } from '@orcabus/platform-cdk-constructs/shared-config/accounts';
 import { Genome, NotInBuiltInHmfReferenceGenomesType, VersionType } from './interfaces';
+import { DATA_SCHEMA_REGISTRY_NAME } from '@orcabus/platform-cdk-constructs/shared-config/event-bridge';
 
 export const APP_ROOT = path.join(__dirname, '../../app');
 export const LAMBDA_DIR = path.join(APP_ROOT, 'lambdas');
@@ -15,7 +16,7 @@ export const WORKFLOW_NAME = 'oncoanalyser-wgts-dna-rna';
 // However, because this workflow has the same workflow name as the
 // existing production workflow, we need to filter on the payload version
 // to prevent the wrong service from being triggered
-export const DEFAULT_WORKFLOW_VERSION: VersionType = '2.1.0';
+export const DEFAULT_WORKFLOW_VERSION: VersionType = '2.2.0';
 export const DEFAULT_PAYLOAD_VERSION = '2025.08.05';
 
 // Yet to implement draft events into this service
@@ -29,45 +30,60 @@ export const WORKFLOW_VERSION_TO_DEFAULT_ICAV2_PIPELINE_ID_MAP: Record<VersionTy
   // At the moment we are running manual deployments of the workflow
   '2.0.0': 'a64126df-d8b2-4ec0-99df-1154f44a74ef',
   '2.1.0': 'ab6e1d62-1b5a-4b24-86b8-81ccf4bdc7a2',
+  '2.2.0': '40b8005e-1473-4257-9949-cc8b42750cf0',
 };
 
 export const WORKFLOW_VERSION_TO_DEFAULT_HMF_REFERENCE_PATHS_MAP: Record<VersionType, string> = {
   '2.0.0':
-    's3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/reference-data/hartwig/hmf-reference-data/hmftools/hmf_pipeline_resources.38_v2.0--3/',
+    's3://reference-data-503977275616-ap-southeast-2/refdata/hartwig/hmf-reference-data/hmftools/hmf_pipeline_resources.38_v2.0--3/',
   '2.1.0':
-    's3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/reference-data/hartwig/hmf-reference-data/hmftools/hmf_pipeline_resources.38_v2.1.0--1/',
+    's3://reference-data-503977275616-ap-southeast-2/refdata/hartwig/hmf-reference-data/hmftools/hmf_pipeline_resources.38_v2.1.0--1/',
+  '2.2.0':
+    's3://reference-data-503977275616-ap-southeast-2/refdata/hartwig/hmf-reference-data/hmftools/hmf_pipeline_resources.38_v2.2.0--3/',
 };
 
 export const GENOMES_MAP: Record<NotInBuiltInHmfReferenceGenomesType, Genome> = {
   GRCh38_umccr: {
     fasta:
-      's3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/reference-data/genomes/GRCh38_umccr/GRCh38_full_analysis_set_plus_decoy_hla.fa',
-    fai: 's3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/reference-data/genomes/GRCh38_umccr/samtools_index/1.16/GRCh38_full_analysis_set_plus_decoy_hla.fa.fai',
-    dict: 's3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/reference-data/genomes/GRCh38_umccr/samtools_index/1.16/GRCh38_full_analysis_set_plus_decoy_hla.fa.dict',
-    img: 's3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/reference-data/genomes/GRCh38_umccr/samtools_index/1.16/GRCh38_full_analysis_set_plus_decoy_hla.fa.img',
-    bwamem2_index:
-      's3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/reference-data/genomes/GRCh38_umccr/bwa-mem2_index/2.2.1/',
-    gridss_index:
-      's3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/reference-data/genomes/GRCh38_umccr/gridss_index/2.13.2/',
-    star_index:
-      's3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/reference-data/genomes/GRCh38_umccr/star_index/gencode_38/2.7.3a/',
+      's3://reference-data-503977275616-ap-southeast-2/refdata/genomes/GRCh38_umccr/GRCh38_full_analysis_set_plus_decoy_hla.fa',
+    fai: 's3://reference-data-503977275616-ap-southeast-2/refdata/genomes/GRCh38_umccr/samtools_index/1.16/GRCh38_full_analysis_set_plus_decoy_hla.fa.fai',
+    dict: 's3://reference-data-503977275616-ap-southeast-2/refdata/genomes/GRCh38_umccr/samtools_index/1.16/GRCh38_full_analysis_set_plus_decoy_hla.fa.dict',
+    img: 's3://reference-data-503977275616-ap-southeast-2/refdata/genomes/GRCh38_umccr/bwa_index_image/0.7.17-r1188/GRCh38_full_analysis_set_plus_decoy_hla.fa.img',
+    bwamem2Index:
+      's3://reference-data-503977275616-ap-southeast-2/refdata/genomes/GRCh38_umccr/bwa-mem2_index/2.2.1/',
+    gridssIndex:
+      's3://reference-data-503977275616-ap-southeast-2/refdata/genomes/GRCh38_umccr/gridss_index/2.13.2/',
+    starIndex:
+      's3://reference-data-503977275616-ap-southeast-2/refdata/genomes/GRCh38_umccr/star_index/gencode_38/2.7.3a/',
   },
 };
+
+export const DEFAULT_PROCESSES_LIST = ['lilac', 'neo', 'cuppa', 'orange'];
 
 export const DEFAULT_WORKFLOW_INPUTS_BY_VERSION_MAP: Record<VersionType, object> = {
   '2.0.0': {
     mode: 'wgts',
     genome: 'GRCh38_umccr',
-    genome_version: '38',
-    genome_type: 'alt',
-    force_genome: true,
+    genomeVersion: '38',
+    genomeType: 'alt',
+    forceGenome: true,
+    processesList: DEFAULT_PROCESSES_LIST,
   },
   '2.1.0': {
     mode: 'wgts',
     genome: 'GRCh38_umccr',
-    genome_version: '38',
-    genome_type: 'alt',
-    force_genome: true,
+    genomeVersion: '38',
+    genomeType: 'alt',
+    forceGenome: true,
+    processesList: DEFAULT_PROCESSES_LIST,
+  },
+  '2.2.0': {
+    mode: 'wgts',
+    genome: 'GRCh38_umccr',
+    genomeVersion: '38',
+    genomeType: 'alt',
+    forceGenome: true,
+    processesList: DEFAULT_PROCESSES_LIST,
   },
 };
 
@@ -117,23 +133,23 @@ export const SSM_PARAMETER_PATH_PREFIX_GENOMES = path.join(SSM_PARAMETER_PATH_PR
 export const EVENT_BUS_NAME = 'OrcaBusMain';
 export const EVENT_SOURCE = 'orcabus.oncoanalyserwgtsboth';
 export const WORKFLOW_RUN_STATE_CHANGE_DETAIL_TYPE = 'WorkflowRunStateChange';
+export const WORKFLOW_RUN_UPDATE_DETAIL_TYPE = 'WorkflowRunUpdate';
 export const ICAV2_WES_REQUEST_DETAIL_TYPE = 'Icav2WesRequest';
 export const ICAV2_WES_STATE_CHANGE_DETAIL_TYPE = 'Icav2WesAnalysisStateChange';
-
 export const WORKFLOW_MANAGER_EVENT_SOURCE = 'orcabus.workflowmanager';
 export const ICAV2_WES_EVENT_SOURCE = 'orcabus.icav2wesmanager';
 
-// Yet to implement draft events into this service
-// export const FASTQ_SYNC_DETAIL_TYPE = 'FastqSync';
-
 /* Event rule constants */
 // Yet to implement draft events into this service
-// export const DRAFT_STATUS = 'DRAFT';
+export const DRAFT_STATUS = 'DRAFT';
 export const READY_STATUS = 'READY';
+export const SUCCEEDED_STATUS = 'SUCCEEDED';
+export const ONCOANALYSER_WGTS_DNA_WORKFLOW_NAME = 'oncoanalyser-wgts-dna';
+export const ONCOANALYSER_WGTS_RNA_WORKFLOW_NAME = 'oncoanalyser-wgts-rna';
 
 /* Schema constants */
 // Yet to implement draft events into this service
-export const SCHEMA_REGISTRY_NAME = EVENT_SOURCE;
+export const SCHEMA_REGISTRY_NAME = DATA_SCHEMA_REGISTRY_NAME;
 export const SSM_SCHEMA_ROOT = path.join(SSM_PARAMETER_PATH_PREFIX, 'schemas');
 
 /* Future proofing */
