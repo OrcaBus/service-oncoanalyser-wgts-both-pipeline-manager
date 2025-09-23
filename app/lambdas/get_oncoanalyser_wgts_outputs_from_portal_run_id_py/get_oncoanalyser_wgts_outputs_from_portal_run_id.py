@@ -12,6 +12,7 @@ from urllib.parse import urlparse, urlunparse
 
 # Layer imports
 from orcabus_api_tools.filemanager import list_files_from_portal_run_id
+from orcabus_api_tools.workflow import get_latest_payload_from_portal_run_id, get_workflow_run_from_portal_run_id
 
 # Globals
 ONCOANALYSER_WGTS_DNA_WORKFLOW_RUN_NAME = "oncoanalyser-wgts-dna"
@@ -20,10 +21,6 @@ Phenotype = Literal["TUMOR", "NORMAL"]
 SampleType = Literal["DNA", "RNA"]
 PHENOTYPE_LIST: List[Phenotype] = ["TUMOR", "NORMAL"]
 SAMPLE_LIST: List[SampleType] = ["DNA", "RNA"]
-
-# RELATIVE OUTPUTS
-DNA_MIDFIX = "{TUMOR_DNA_LIBRARY_ID}__{NORMAL_DNA_LIBRARY_ID}"
-RNA_MIDFIX = "{TUMOR_RNA_LIBRARY_ID}"
 
 
 class TumorDnaInputs(TypedDict):
@@ -55,31 +52,31 @@ class TumorRnaInputs(TypedDict):
 
 
 TUMOR_DNA: TumorDnaInputs = {
-    "bamRedux": f"{DNA_MIDFIX}/alignments/dna/{{TUMOR_DNA_LIBRARY_ID}}.redux.bam",
-    "reduxJitterTsv": f"{DNA_MIDFIX}/alignments/dna/{{TUMOR_DNA_LIBRARY_ID}}.jitter_params.tsv",
-    "reduxMsTsv": f"{DNA_MIDFIX}/alignments/dna/{{TUMOR_DNA_LIBRARY_ID}}.ms_table.tsv.gz",
-    "bamtoolsDir": f"{DNA_MIDFIX}/bamtools/{{TUMOR_DNA_LIBRARY_ID}}__{{NORMAL_DNA_LIBRARY_ID}}_{{TUMOR_DNA_LIBRARY_ID}}_bamtools/",
-    "sageDir": f"{DNA_MIDFIX}/sage_calling/somatic/",
-    "linxAnnoDir": f"{DNA_MIDFIX}/linx/somatic_annotations/",
-    "linxPlotDir": f"{DNA_MIDFIX}/linx/somatic_plots/",
-    "purpleDir": f"{DNA_MIDFIX}/purple/",
-    "virusinterpreterDir": f"{DNA_MIDFIX}/virusinterpreter/",
-    "chordDir": f"{DNA_MIDFIX}/chord/",
-    "sigsDir": f"{DNA_MIDFIX}/sigs/",
+    "bamRedux": f"{{DNA_MIDFIX}}/alignments/dna/{{TUMOR_DNA_LIBRARY_ID}}.redux.bam",
+    "reduxJitterTsv": f"{{DNA_MIDFIX}}/alignments/dna/{{TUMOR_DNA_LIBRARY_ID}}.jitter_params.tsv",
+    "reduxMsTsv": f"{{DNA_MIDFIX}}/alignments/dna/{{TUMOR_DNA_LIBRARY_ID}}.ms_table.tsv.gz",
+    "bamtoolsDir": f"{{DNA_MIDFIX}}/bamtools/{{DNA_MIDFIX}}_{{TUMOR_DNA_LIBRARY_ID}}_bamtools/",
+    "sageDir": f"{{DNA_MIDFIX}}/sage_calling/somatic/",
+    "linxAnnoDir": f"{{DNA_MIDFIX}}/linx/somatic_annotations/",
+    "linxPlotDir": f"{{DNA_MIDFIX}}/linx/somatic_plots/",
+    "purpleDir": f"{{DNA_MIDFIX}}/purple/",
+    "virusinterpreterDir": f"{{DNA_MIDFIX}}/virusinterpreter/",
+    "chordDir": f"{{DNA_MIDFIX}}/chord/",
+    "sigsDir": f"{{DNA_MIDFIX}}/sigs/",
 }
 
 NORMAL_DNA: NormalDnaInputs = {
-    "bamRedux": f"{DNA_MIDFIX}/alignments/dna/{{NORMAL_DNA_LIBRARY_ID}}.redux.bam",
-    "reduxJitterTsv": f"{DNA_MIDFIX}/alignments/dna/{{NORMAL_DNA_LIBRARY_ID}}.jitter_params.tsv",
-    "reduxMsTsv": f"{DNA_MIDFIX}/alignments/dna/{{NORMAL_DNA_LIBRARY_ID}}.ms_table.tsv.gz",
-    "bamtoolsDir": f"{DNA_MIDFIX}/bamtools/{{TUMOR_DNA_LIBRARY_ID}}__{{NORMAL_DNA_LIBRARY_ID}}_{{NORMAL_DNA_LIBRARY_ID}}_bamtools/",
-    "sageDir": f"{DNA_MIDFIX}/sage_calling/germline/",
-    "linxAnnoDir": f"{DNA_MIDFIX}/linx/germline_annotations/",
+    "bamRedux": f"{{DNA_MIDFIX}}/alignments/dna/{{NORMAL_DNA_LIBRARY_ID}}.redux.bam",
+    "reduxJitterTsv": f"{{DNA_MIDFIX}}/alignments/dna/{{NORMAL_DNA_LIBRARY_ID}}.jitter_params.tsv",
+    "reduxMsTsv": f"{{DNA_MIDFIX}}/alignments/dna/{{NORMAL_DNA_LIBRARY_ID}}.ms_table.tsv.gz",
+    "bamtoolsDir": f"{{DNA_MIDFIX}}/bamtools/{{DNA_MIDFIX}}_{{NORMAL_DNA_LIBRARY_ID}}_bamtools/",
+    "sageDir": f"{{DNA_MIDFIX}}/sage_calling/germline/",
+    "linxAnnoDir": f"{{DNA_MIDFIX}}/linx/germline_annotations/",
 }
 
 TUMOR_RNA: TumorRnaInputs = {
-    "bam": f"{RNA_MIDFIX}/alignments/rna/{{TUMOR_RNA_LIBRARY_ID}}.md.bam",
-    "isofoxDir": f"{RNA_MIDFIX}/isofox/",
+    "bam": f"{{RNA_MIDFIX}}/alignments/rna/{{TUMOR_RNA_LIBRARY_ID}}.md.bam",
+    "isofoxDir": f"{{RNA_MIDFIX}}/isofox/",
 }
 
 
@@ -96,6 +93,7 @@ def extend_s3_uri_path(analysis_root_prefix: str, path: str) -> str:
 def get_path_prefix_from_path_key(
         object_: Union[TUMOR_DNA, NORMAL_DNA, TUMOR_RNA],
         key: str,
+        relative_output_path: str,
         tumor_dna_library_id: Optional[str] = None,
         normal_dna_library_id: Optional[str] = None,
         tumor_rna_library_id: Optional[str] = None,
@@ -108,8 +106,8 @@ def get_path_prefix_from_path_key(
                     "TUMOR_DNA_LIBRARY_ID": tumor_dna_library_id,
                     "NORMAL_DNA_LIBRARY_ID": normal_dna_library_id,
                     "TUMOR_RNA_LIBRARY_ID": tumor_rna_library_id,
-                    "DNA_MIDFIX": f"{tumor_dna_library_id}__{normal_dna_library_id}",
-                    "RNA_MIDFIX": f"{tumor_rna_library_id}",
+                    "DNA_MIDFIX": f"{Path(relative_output_path)}",
+                    "RNA_MIDFIX": f"{Path(relative_output_path)}",
                 }.items()
             ))
         )
@@ -118,6 +116,7 @@ def get_path_prefix_from_path_key(
 
 def get_tumor_dna_inputs(
         portal_run_id_analysis_root_prefix: str,
+        relative_output_path: str,
         tumor_dna_library_id: str,
         normal_dna_library_id: str,
 ) -> TumorDnaInputs:
@@ -131,6 +130,7 @@ def get_tumor_dna_inputs(
                     get_path_prefix_from_path_key(
                         object_=TUMOR_DNA,
                         key=kv_iter_[0],
+                        relative_output_path=relative_output_path,
                         tumor_dna_library_id=tumor_dna_library_id,
                         normal_dna_library_id=normal_dna_library_id,
                     )
@@ -143,6 +143,7 @@ def get_tumor_dna_inputs(
 
 def get_normal_dna_inputs(
         portal_run_id_analysis_root_prefix: str,
+        relative_output_path: str,
         tumor_dna_library_id: str,
         normal_dna_library_id: str,
 ) -> TumorDnaInputs:
@@ -156,6 +157,7 @@ def get_normal_dna_inputs(
                     get_path_prefix_from_path_key(
                         object_=NORMAL_DNA,
                         key=kv_iter_[0],
+                        relative_output_path=relative_output_path,
                         tumor_dna_library_id=tumor_dna_library_id,
                         normal_dna_library_id=normal_dna_library_id,
                     )
@@ -168,6 +170,7 @@ def get_normal_dna_inputs(
 
 def get_tumor_rna_inputs(
         portal_run_id_analysis_root_prefix: str,
+        relative_output_path: str,
         tumor_rna_library_id: str,
 ) -> TumorRnaInputs:
     return cast(
@@ -180,6 +183,7 @@ def get_tumor_rna_inputs(
                     get_path_prefix_from_path_key(
                         object_=TUMOR_RNA,
                         key=kv_iter_[0],
+                        relative_output_path=relative_output_path,
                         tumor_rna_library_id=tumor_rna_library_id,
                     )
                 )
@@ -194,6 +198,11 @@ def get_portal_run_id_root_prefix(portal_run_id: str) -> str:
     all_portal_run_id_files = list_files_from_portal_run_id(
         portal_run_id
     )
+
+    all_portal_run_id_files = list(filter(
+        lambda file_iter_: not '/cache/' in file_iter_['key'],
+        all_portal_run_id_files
+    ))
 
     if len(all_portal_run_id_files) == 0:
         raise ValueError(f"No files found for portal run id {portal_run_id}")
@@ -224,6 +233,33 @@ def get_inputs(
     # Portal run id prefix
     portal_run_id_analysis_root_prefix = get_portal_run_id_root_prefix(portal_run_id)
 
+    # Get output relative path
+    if sample_type == 'DNA':
+        outputs = get_latest_payload_from_portal_run_id(
+            portal_run_id=portal_run_id
+        )['data']['outputs']
+
+        if 'dnaOncoanalyserAnalysisRelPath' in outputs:
+            output_relative_path = outputs['dnaOncoanalyserAnalysisRelPath']
+        elif 'dnaOncoanalyserAnalysisUri' in outputs:
+            output_uri = get_latest_payload_from_portal_run_id(
+                portal_run_id=portal_run_id
+            )['data']['engineParameters']['outputUri']
+            output_relative_path = str(
+                Path(
+                    urlparse(outputs['dnaOncoanalyserAnalysisUri']).path
+                ).relative_to(
+                    Path(urlparse(output_uri).path)
+                )
+            )
+
+    elif sample_type == 'RNA':
+        output_relative_path = get_latest_payload_from_portal_run_id(
+            portal_run_id=portal_run_id
+        )['data']['outputs']['rnaOncoanalyserAnalysisRelPath']
+    else:
+        raise ValueError(f"Invalid sample type {sample_type}")
+
     # DNA TUMOR
     if sample_type == "DNA" and phenotype == "TUMOR":
         if tumor_dna_library_id is None or normal_dna_library_id is None:
@@ -232,6 +268,7 @@ def get_inputs(
         return {
             "tumorDnaInputs": get_tumor_dna_inputs(
                 portal_run_id_analysis_root_prefix=portal_run_id_analysis_root_prefix,
+                relative_output_path=output_relative_path,
                 tumor_dna_library_id=tumor_dna_library_id,
                 normal_dna_library_id=normal_dna_library_id,
             )
@@ -244,6 +281,7 @@ def get_inputs(
         return {
             "normalDnaInputs": get_normal_dna_inputs(
                 portal_run_id_analysis_root_prefix=portal_run_id_analysis_root_prefix,
+                relative_output_path=output_relative_path,
                 tumor_dna_library_id=tumor_dna_library_id,
                 normal_dna_library_id=normal_dna_library_id,
             )
@@ -255,10 +293,25 @@ def get_inputs(
         return {
             "tumorRnaInputs": get_tumor_rna_inputs(
                 portal_run_id_analysis_root_prefix=portal_run_id_analysis_root_prefix,
+                relative_output_path=output_relative_path,
                 tumor_rna_library_id=tumor_rna_library_id,
             )
         }
     raise ValueError("Invalid combination of sample_type and phenotype")
+
+
+def handle_templates_by_version(portal_run_id: str):
+
+    global TUMOR_DNA, NORMAL_DNA
+
+    workflow_run_obj = get_workflow_run_from_portal_run_id(
+        portal_run_id
+    )
+
+    # Get oncoanalyser version
+    if workflow_run_obj['workflow']['version'] < '2.2.0':
+        TUMOR_DNA['sageDir'] = f"{{DNA_MIDFIX}}/sage/somatic/"
+        NORMAL_DNA['sageDir'] = f"{{DNA_MIDFIX}}/sage/germline/"
 
 
 def handler(event, context):
@@ -268,7 +321,6 @@ def handler(event, context):
     :param context:
     :return:
     """
-
     # Get the library ids from the event
     portal_run_id = event.get('portalRunId', None)
     phenotype: Phenotype = event.get('phenotype', None)
@@ -276,6 +328,8 @@ def handler(event, context):
     tumor_dna_library_id: Optional[str] = event.get('tumorDnaLibraryId', None)
     normal_dna_library_id: Optional[str] = event.get('normalDnaLibraryId', None)
     tumor_rna_library_id: Optional[str] = event.get('tumorRnaLibraryId', None)
+
+    handle_templates_by_version(portal_run_id)
 
     return get_inputs(
         portal_run_id=portal_run_id,

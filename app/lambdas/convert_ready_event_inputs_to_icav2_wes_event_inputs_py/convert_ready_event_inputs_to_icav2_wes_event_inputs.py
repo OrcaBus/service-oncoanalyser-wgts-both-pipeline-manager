@@ -522,6 +522,16 @@ def convert_ready_event_inputs_to_icav2_wes_event_inputs(
                 if inputs.get("genomes") is not None
                 else None
             ),
+            "processes_include": (
+                ",".join(inputs["processesList"])
+                if inputs.get("processesList", None) is not None
+                else None
+            ),
+            "processes_manual": (
+                True
+                if inputs.get("processesList", None) is not None
+                else None
+            )
         }.items()
     ))
 
