@@ -252,6 +252,8 @@ def get_inputs(
                     Path(urlparse(output_uri).path)
                 )
             )
+        else:
+            raise ValueError("No dnaOncoanalyserAnalysisRelPath or dnaOncoanalyserAnalysisUri found in outputs")
 
     elif sample_type == 'RNA':
         output_relative_path = get_latest_payload_from_portal_run_id(
