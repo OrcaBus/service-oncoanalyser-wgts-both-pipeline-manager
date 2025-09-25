@@ -9,6 +9,7 @@
 from typing import Optional, Literal, List, TypedDict, Dict, cast, Union
 from pathlib import Path
 from urllib.parse import urlparse, urlunparse
+from packaging.version import Version
 
 # Layer imports
 from orcabus_api_tools.filemanager import list_files_from_portal_run_id
@@ -200,7 +201,7 @@ def get_portal_run_id_root_prefix(portal_run_id: str) -> str:
     )
 
     all_portal_run_id_files = list(filter(
-        lambda file_iter_: not '/cache/' in file_iter_['key'],
+        lambda file_iter_: '/cache/' not in file_iter_['key'],
         all_portal_run_id_files
     ))
 
@@ -311,7 +312,7 @@ def handle_templates_by_version(portal_run_id: str):
     )
 
     # Get oncoanalyser version
-    if workflow_run_obj['workflow']['version'] < '2.2.0':
+    if Version(workflow_run_obj['workflow']['version']) < Version('2.2.0'):
         TUMOR_DNA['sageDir'] = f"{{DNA_MIDFIX}}/sage/somatic/"
         NORMAL_DNA['sageDir'] = f"{{DNA_MIDFIX}}/sage/germline/"
 
