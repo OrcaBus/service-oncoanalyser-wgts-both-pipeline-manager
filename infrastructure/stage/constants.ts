@@ -1,7 +1,7 @@
 /* Directory constants */
 import path from 'path';
 import { StageName } from '@orcabus/platform-cdk-constructs/shared-config/accounts';
-import { Genome, NotInBuiltInHmfReferenceGenomesType, VersionType } from './interfaces';
+import { Genome, NotInBuiltInHmfReferenceGenomesType, WorkflowVersionType } from './interfaces';
 import { DATA_SCHEMA_REGISTRY_NAME } from '@orcabus/platform-cdk-constructs/shared-config/event-bridge';
 
 export const APP_ROOT = path.join(__dirname, '../../app');
@@ -12,28 +12,33 @@ export const EVENT_SCHEMAS_DIR = path.join(APP_ROOT, 'event-schemas');
 /* Workflow constants */
 export const WORKFLOW_NAME = 'oncoanalyser-wgts-dna-rna';
 
-// Yet to implement draft events into this service
 // However, because this workflow has the same workflow name as the
 // existing production workflow, we need to filter on the payload version
 // to prevent the wrong service from being triggered
-export const DEFAULT_WORKFLOW_VERSION: VersionType = '2.2.0';
+export const DEFAULT_WORKFLOW_VERSION: WorkflowVersionType = '2.2.0';
 export const DEFAULT_PAYLOAD_VERSION = '2025.08.05';
 
-// Yet to implement draft events into this service
+// Add prefix placeholders
 export const WORKFLOW_LOGS_PREFIX = `s3://{__CACHE_BUCKET__}/{__CACHE_PREFIX__}logs/${WORKFLOW_NAME}/`;
 export const WORKFLOW_OUTPUT_PREFIX = `s3://{__CACHE_BUCKET__}/{__CACHE_PREFIX__}analysis/${WORKFLOW_NAME}/`;
 export const WORKFLOW_CACHE_PREFIX = `s3://{__CACHE_BUCKET__}/{__CACHE_PREFIX__}cache/${WORKFLOW_NAME}/`;
 
 /* We extend this every time we release a new version of the workflow */
 /* This is added into our SSM Parameter Store to allow us to map workflow versions to pipeline IDs */
-export const WORKFLOW_VERSION_TO_DEFAULT_ICAV2_PIPELINE_ID_MAP: Record<VersionType, string> = {
+export const WORKFLOW_VERSION_TO_DEFAULT_ICAV2_PIPELINE_ID_MAP: Record<
+  WorkflowVersionType,
+  string
+> = {
   // At the moment we are running manual deployments of the workflow
   '2.0.0': 'a64126df-d8b2-4ec0-99df-1154f44a74ef',
   '2.1.0': 'ab6e1d62-1b5a-4b24-86b8-81ccf4bdc7a2',
   '2.2.0': '40b8005e-1473-4257-9949-cc8b42750cf0',
 };
 
-export const WORKFLOW_VERSION_TO_DEFAULT_HMF_REFERENCE_PATHS_MAP: Record<VersionType, string> = {
+export const WORKFLOW_VERSION_TO_DEFAULT_HMF_REFERENCE_PATHS_MAP: Record<
+  WorkflowVersionType,
+  string
+> = {
   '2.0.0':
     's3://reference-data-503977275616-ap-southeast-2/refdata/hartwig/hmf-reference-data/hmftools/hmf_pipeline_resources.38_v2.0--3/',
   '2.1.0':
@@ -60,7 +65,7 @@ export const GENOMES_MAP: Record<NotInBuiltInHmfReferenceGenomesType, Genome> = 
 
 export const DEFAULT_PROCESSES_LIST = ['lilac', 'neo', 'cuppa', 'orange'];
 
-export const DEFAULT_WORKFLOW_INPUTS_BY_VERSION_MAP: Record<VersionType, object> = {
+export const DEFAULT_WORKFLOW_INPUTS_BY_VERSION_MAP: Record<WorkflowVersionType, object> = {
   '2.0.0': {
     mode: 'wgts',
     genome: 'GRCh38_umccr',
@@ -140,7 +145,6 @@ export const WORKFLOW_MANAGER_EVENT_SOURCE = 'orcabus.workflowmanager';
 export const ICAV2_WES_EVENT_SOURCE = 'orcabus.icav2wesmanager';
 
 /* Event rule constants */
-// Yet to implement draft events into this service
 export const DRAFT_STATUS = 'DRAFT';
 export const READY_STATUS = 'READY';
 export const SUCCEEDED_STATUS = 'SUCCEEDED';
@@ -148,7 +152,6 @@ export const ONCOANALYSER_WGTS_DNA_WORKFLOW_NAME = 'oncoanalyser-wgts-dna';
 export const ONCOANALYSER_WGTS_RNA_WORKFLOW_NAME = 'oncoanalyser-wgts-rna';
 
 /* Schema constants */
-// Yet to implement draft events into this service
 export const SCHEMA_REGISTRY_NAME = DATA_SCHEMA_REGISTRY_NAME;
 export const SSM_SCHEMA_ROOT = path.join(SSM_PARAMETER_PATH_PREFIX, 'schemas');
 

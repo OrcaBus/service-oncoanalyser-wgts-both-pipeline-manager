@@ -1,4 +1,4 @@
-import { Genome } from '../interfaces';
+import { Genome, WorkflowVersionType } from '../interfaces';
 
 export interface SsmParameterValues {
   // Payload defaults
@@ -7,17 +7,17 @@ export interface SsmParameterValues {
   workflowVersion: string;
 
   // Input defaults
-  inputsByWorkflowVersionMap: Record<string, object>;
+  inputsByWorkflowVersionMap: Record<WorkflowVersionType, object>;
 
   // Engine Parameter defaults
-  pipelineIdsByWorkflowVersionMap: Record<string, string>;
+  pipelineIdsByWorkflowVersionMap: Record<WorkflowVersionType, string>;
   icav2ProjectId: string;
   logsPrefix: string;
   outputPrefix: string;
   cachePrefix: string;
 
   // Reference defaults
-  hmfReferenceDataByWorkflowVersionMap: Record<string, string>;
+  hmfReferenceDataByWorkflowVersionMap: Record<WorkflowVersionType, string>;
   genomes: Record<string, Genome>;
 }
 
