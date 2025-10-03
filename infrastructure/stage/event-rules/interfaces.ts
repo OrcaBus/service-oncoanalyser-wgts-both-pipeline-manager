@@ -17,6 +17,9 @@ export type EventBridgeRuleName =
   | 'icav2WesAnalysisStateChange';
 
 export const eventBridgeRuleNameList: EventBridgeRuleName[] = [
+  // Upstream Succeeded (Oncoanalyser WGTS DNA | RNA)
+  'upstreamSucceededEventLegacy',
+  'upstreamSucceededEvent',
   // Pre-draft
   'wrscDraftLegacy',
   'wrscDraft',
