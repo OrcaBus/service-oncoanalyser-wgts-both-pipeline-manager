@@ -7,6 +7,9 @@ import { StepFunctionObject } from '../step-functions/interfaces';
  * EventBridge Target Interfaces
  */
 export type EventBridgeTargetName =
+  // Upstream Succeeded
+  | 'upstreamSucceededEventLegacyToGlueSucceededEvents'
+  | 'upstreamSucceededEventToGlueSucceededEvents'
   // Populate draft data event targets
   | 'draftLegacyToPopulateDraftDataSfnTarget'
   | 'draftToPopulateDraftDataSfnTarget'
@@ -20,6 +23,9 @@ export type EventBridgeTargetName =
   | 'icav2WesAnalysisStateChangeEventToWrscSfnTarget';
 
 export const eventBridgeTargetsNameList: EventBridgeTargetName[] = [
+  // Upstream WGTS Succeeded
+  'upstreamSucceededEventLegacyToGlueSucceededEvents',
+  'upstreamSucceededEventToGlueSucceededEvents',
   // Populate draft data event targets
   'draftLegacyToPopulateDraftDataSfnTarget',
   'draftToPopulateDraftDataSfnTarget',

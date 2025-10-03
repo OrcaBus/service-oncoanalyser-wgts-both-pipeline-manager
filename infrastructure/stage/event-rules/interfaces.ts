@@ -4,10 +4,13 @@ import { EventPattern, IEventBus, Rule } from 'aws-cdk-lib/aws-events';
  * EventBridge Rules Interfaces
  */
 export type EventBridgeRuleName =
-  // Pre-draft
+  // Upstream Succeeded (Oncoanalyser WGTS DNA | RNA)
+  | 'upstreamSucceededEventLegacy'
+  | 'upstreamSucceededEvent'
+  // Draft
   | 'wrscDraftLegacy'
   | 'wrscDraft'
-  // Pre-ready
+  // ready
   | 'wrscReadyLegacy'
   | 'wrscReady'
   // Post-submitted
