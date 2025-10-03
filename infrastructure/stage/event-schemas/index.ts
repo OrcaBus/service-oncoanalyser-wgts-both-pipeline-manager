@@ -41,12 +41,6 @@ export function buildSchemas(scope: Construct) {
       schemaName: schemaName,
     });
 
-    // Add an ssm entry for the registry name
-    new ssm.StringParameter(scope, `${SCHEMA_REGISTRY_NAME}-ssm`, {
-      parameterName: path.join(SSM_SCHEMA_ROOT, 'registry'),
-      stringValue: <string>schemaObj.registryName,
-    });
-
     // And also a latest ssm parameter for the schema
     // Likely the one most commonly used
     new ssm.StringParameter(scope, `${schemaName}-ssm-latest`, {
