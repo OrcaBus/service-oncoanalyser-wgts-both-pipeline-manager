@@ -72,7 +72,8 @@
       ],
       "Next": "Did we get a oncoanalyser portal run id",
       "Assign": {
-        "draftPortalRunId": "{% $states.result.Payload.workflowRunObject.portalRunId ? $states.result.Payload.workflowRunObject.portalRunId : null %}"
+        "draftPortalRunId": "{% $states.result.Payload.workflowRunObject.portalRunId ? $states.result.Payload.workflowRunObject.portalRunId : null %}",
+        "libraries": "{% $states.result.Payload.workflowRunObject.libraries ? $states.result.Payload.workflowRunObject.libraries : null %}"
       }
     },
     "Did we get a oncoanalyser portal run id": {
@@ -185,7 +186,9 @@
                         "Payload": {
                           "portalRunId": "{% $upstreamPortalRunId %}",
                           "phenotype": "NORMAL",
-                          "sampleType": "DNA"
+                          "sampleType": "DNA",
+                          "tumorDnaLibraryId": "$draftPayload.data.tags.tumorDnaLibraryId ? $draftPayload.data.tags.tumorDnaLibraryId : null",
+                          "normalDnaLibraryId": "$draftPayload.data.tags.normalDnaLibraryId ? $draftPayload.data.tags.nomralDnaLibraryId : null"
                         }
                       },
                       "Retry": [
@@ -241,7 +244,9 @@
                         "Payload": {
                           "portalRunId": "{% $upstreamPortalRunId %}",
                           "phenotype": "TUMOR",
-                          "sampleType": "DNA"
+                          "sampleType": "DNA",
+                          "tumorDnaLibraryId": "$draftPayload.data.tags.tumorDnaLibraryId ? $draftPayload.data.tags.tumorDnaLibraryId : null",
+                          "normalDnaLibraryId": "$draftPayload.data.tags.normalDnaLibraryId ? $draftPayload.data.tags.nomralDnaLibraryId : null"
                         }
                       },
                       "Retry": [
@@ -309,7 +314,8 @@
                         "Payload": {
                           "portalRunId": "{% $upstreamPortalRunId %}",
                           "phenotype": "TUMOR",
-                          "sampleType": "RNA"
+                          "sampleType": "RNA",
+                          "tumorRnaLibraryId": "$draftPayload.data.tags.tumorRnaLibraryId ? $draftPayload.data.tags.tumorRnaLibraryId : null"
                         }
                       },
                       "Retry": [
@@ -335,11 +341,13 @@
                   "States": {
                     "Placeholder (RNA)": {
                       "Type": "Pass",
-                      "End": true
+                      "End": true,
+                      "Output": {}
                     }
                   }
                 }
-              ]
+              ],
+              "Output": "{% $states.result ~> $merge %}"
             },
             "Pass (RNA)": {
               "Type": "Pass",
