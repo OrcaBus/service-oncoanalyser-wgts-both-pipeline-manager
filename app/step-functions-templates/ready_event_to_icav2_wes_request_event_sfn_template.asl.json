@@ -15,7 +15,8 @@
       "Arguments": {
         "FunctionName": "${__convert_ready_event_inputs_to_icav2_wes_event_inputs_lambda_function_arn__}",
         "Payload": {
-          "inputs": "{% $readyEventDetail.payload.data.inputs %}"
+          "inputs": "{% $readyEventDetail.payload.data.inputs %}",
+          "workflowVersion": "{% $readyEventDetail.workflow.version %}"
         }
       },
       "Retry": [

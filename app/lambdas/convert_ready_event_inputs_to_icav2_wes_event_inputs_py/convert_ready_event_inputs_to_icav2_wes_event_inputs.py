@@ -276,7 +276,9 @@ WES Input Payload:
 }
 """
 
+# Standard imports
 from typing import Dict, List
+from packaging.version import Version
 
 # Globals
 DEFAULT_MODE = "wgts"
@@ -329,6 +331,8 @@ TUMOR_RNA_INPUT_PARAMS = [
     "isofoxDir",
 ]
 
+DEFAULT_WORKFLOW_VERSION = "2.2.0"
+PROCESSES_PIVOT_WORKFLOW_VERSION = Version("2.2.0")
 
 def convert_params_to_samplesheet_row(
         group_id: str,
@@ -386,7 +390,7 @@ def map_normal_dna_inputs_to_samplesheet_rows(
         subject_id: str,
         normal_dna_sample_id: str,
         normal_dna_inputs_dict: Dict[str, str]
-)-> List[Dict[str, str]]:
+) -> List[Dict[str, str]]:
     """
     Map normal DNA inputs to samplesheet rows.
     :param group_id: Group ID.
@@ -408,12 +412,13 @@ def map_normal_dna_inputs_to_samplesheet_rows(
         normal_dna_inputs_dict.items()
     ))
 
+
 def map_tumor_rna_inputs_to_samplesheet_rows(
         group_id: str,
         subject_id: str,
         tumor_rna_sample_id: str,
         tumor_rna_inputs_dict: Dict[str, str]
-)-> List[Dict[str, str]]:
+) -> List[Dict[str, str]]:
     """
     Map normal DNA inputs to samplesheet rows.
     :param group_id: Group ID.
@@ -456,36 +461,38 @@ def genome_keys_to_snake_case(genome: Dict[str, str]) -> Dict[str, str]:
         genome.items()
     ))
 
+
 def camel_case_to_snake_case(name: str) -> str:
     """Convert camelCase to snake_case."""
     return ''.join(['_' + i.lower() if i.isupper() else i for i in name]).lstrip('_')
 
 
 def convert_ready_event_inputs_to_icav2_wes_event_inputs(
-        inputs: Dict[str, any]
+        inputs: Dict[str, any],
+        workflow_version: Version = Version(DEFAULT_WORKFLOW_VERSION)
 ) -> Dict[str, any]:
     """
     Convert the ready event inputs to ICAv2 WES event inputs.
     """
     samplesheet = (
-        map_tumor_dna_inputs_to_samplesheet_rows(
-            group_id=inputs["groupId"],
-            subject_id=inputs["subjectId"],
-            tumor_dna_sample_id=inputs["tumorDnaSampleId"],
-            tumor_dna_inputs_dict=inputs.get("tumorDnaInputs", {})
-        ) +
-        map_normal_dna_inputs_to_samplesheet_rows(
-            group_id=inputs["groupId"],
-            subject_id=inputs["subjectId"],
-            normal_dna_sample_id=inputs["normalDnaSampleId"],
-            normal_dna_inputs_dict=inputs.get("normalDnaInputs", {})
-        ) +
-        map_tumor_rna_inputs_to_samplesheet_rows(
-            group_id=inputs["groupId"],
-            subject_id=inputs["subjectId"],
-            tumor_rna_sample_id=inputs["tumorRnaSampleId"],
-            tumor_rna_inputs_dict=inputs.get("tumorRnaInputs", {})
-        )
+            map_tumor_dna_inputs_to_samplesheet_rows(
+                group_id=inputs["groupId"],
+                subject_id=inputs["subjectId"],
+                tumor_dna_sample_id=inputs["tumorDnaSampleId"],
+                tumor_dna_inputs_dict=inputs.get("tumorDnaInputs", {})
+            ) +
+            map_normal_dna_inputs_to_samplesheet_rows(
+                group_id=inputs["groupId"],
+                subject_id=inputs["subjectId"],
+                normal_dna_sample_id=inputs["normalDnaSampleId"],
+                normal_dna_inputs_dict=inputs.get("normalDnaInputs", {})
+            ) +
+            map_tumor_rna_inputs_to_samplesheet_rows(
+                group_id=inputs["groupId"],
+                subject_id=inputs["subjectId"],
+                tumor_rna_sample_id=inputs["tumorRnaSampleId"],
+                tumor_rna_inputs_dict=inputs.get("tumorRnaInputs", {})
+            )
     )
 
     # Extend samplesheet with bam indexes for bam_redux and bam filetypes
@@ -523,14 +530,29 @@ def convert_ready_event_inputs_to_icav2_wes_event_inputs(
                 else None
             ),
             "processes_include": (
+                # Not required in versions greater than 2.2.0
                 ",".join(inputs["processesList"])
-                if inputs.get("processesList", None) is not None
+                if (
+                    inputs.get("processesList", None) is not None and
+                    workflow_version < PROCESSES_PIVOT_WORKFLOW_VERSION
+                )
                 else None
             ),
             "processes_manual": (
-                True
-                if inputs.get("processesList", None) is not None
-                else None
+                # Boolean in previous versions
+                ",".join(inputs["processesList"])
+                if (
+                        inputs.get("processesList", None) is not None and
+                        workflow_version >= PROCESSES_PIVOT_WORKFLOW_VERSION
+                )
+                else (
+                    True
+                    if (
+                            inputs.get("processesList", None) is not None and
+                            workflow_version < PROCESSES_PIVOT_WORKFLOW_VERSION
+                    )
+                    else None
+                )
             )
         }.items()
     ))
@@ -543,9 +565,11 @@ def handler(event, context):
     :param context:
     :return:
     """
+    workflow_version = Version(event.get("workflowVersion", DEFAULT_WORKFLOW_VERSION))
 
     return {
         "inputs": convert_ready_event_inputs_to_icav2_wes_event_inputs(
-            event['inputs']
+            inputs=event['inputs'],
+            workflow_version=workflow_version
         )
     }
