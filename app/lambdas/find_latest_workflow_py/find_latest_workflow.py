@@ -84,7 +84,10 @@ def handler(event, context):
     # Get the latest draft workflow for the given workflow name
     return {
         "workflowRunObject": sorted(
-            workflows_list,
+            list(map(
+                lambda workflow_iter_: get_workflow_run(workflow_iter_['orcabusId']),
+                workflows_list
+            )),
             key=lambda workflow_iter_: workflow_iter_['orcabusId'],
             reverse=True
         )[0]
