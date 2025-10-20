@@ -187,8 +187,8 @@
                           "portalRunId": "{% $upstreamPortalRunId %}",
                           "phenotype": "NORMAL",
                           "sampleType": "DNA",
-                          "tumorDnaLibraryId": "$draftPayload.data.tags.tumorDnaLibraryId ? $draftPayload.data.tags.tumorDnaLibraryId : null",
-                          "normalDnaLibraryId": "$draftPayload.data.tags.normalDnaLibraryId ? $draftPayload.data.tags.normalDnaLibraryId : null"
+                          "tumorDnaLibraryId": "{% $draftPayload.data.tags.tumorDnaLibraryId ? $draftPayload.data.tags.tumorDnaLibraryId : null %}",
+                          "normalDnaLibraryId": "{% $draftPayload.data.tags.normalDnaLibraryId ? $draftPayload.data.tags.normalDnaLibraryId : null %}"
                         }
                       },
                       "Retry": [
@@ -245,8 +245,8 @@
                           "portalRunId": "{% $upstreamPortalRunId %}",
                           "phenotype": "TUMOR",
                           "sampleType": "DNA",
-                          "tumorDnaLibraryId": "$draftPayload.data.tags.tumorDnaLibraryId ? $draftPayload.data.tags.tumorDnaLibraryId : null",
-                          "normalDnaLibraryId": "$draftPayload.data.tags.normalDnaLibraryId ? $draftPayload.data.tags.normalDnaLibraryId : null"
+                          "tumorDnaLibraryId": "{% $draftPayload.data.tags.tumorDnaLibraryId ? $draftPayload.data.tags.tumorDnaLibraryId : null %}",
+                          "normalDnaLibraryId": "{% $draftPayload.data.tags.normalDnaLibraryId ? $draftPayload.data.tags.normalDnaLibraryId : null %}"
                         }
                       },
                       "Retry": [
@@ -315,7 +315,7 @@
                           "portalRunId": "{% $upstreamPortalRunId %}",
                           "phenotype": "TUMOR",
                           "sampleType": "RNA",
-                          "tumorRnaLibraryId": "$draftPayload.data.tags.tumorRnaLibraryId ? $draftPayload.data.tags.tumorRnaLibraryId : null"
+                          "tumorRnaLibraryId": "{% $draftPayload.data.tags.tumorRnaLibraryId ? $draftPayload.data.tags.tumorRnaLibraryId : null %}"
                         }
                       },
                       "Retry": [
