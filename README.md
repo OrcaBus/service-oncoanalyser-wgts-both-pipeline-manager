@@ -87,7 +87,7 @@ Standard Operational Procedures (SOPs)
 Our SOPs guide can be found [here][sop_readme_link].
 
 This includes instructions for common operational tasks such as:
-- [Manually running an analysis][sop_readme_link#manually-running-an-analysis]
+- [Manually running an analysis][manually_running_an_analysis_sop_link]
 
 Infrastructure & Deployment
 --------------------------------------------------------------------------------
@@ -251,3 +251,4 @@ For general terms and expressions used across OrcaBus services, please see the
 platform [documentation](https://github.com/OrcaBus/wiki/blob/main/orcabus-platform/README.md#glossary--references).
 
 [sop_readme_link]: "/docs/operation/SOP/README.md"
+[manually_running_an_analysis_sop_link]: "/docs/operation/SOP/PM.OWB.1/PM.OWB.1-ManualPipelineExecution.md
