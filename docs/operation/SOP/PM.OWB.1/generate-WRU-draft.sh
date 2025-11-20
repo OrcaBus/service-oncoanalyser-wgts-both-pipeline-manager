@@ -41,6 +41,7 @@ Run this script to generate a draft WorkflowRunUpdate event for the specified li
 
 Positional arguments:
   library_id:   One or more library IDs to link to the WorkflowRunUpdate event.
+  			  	We expect three library ids to be provided (one WGS tumor, one WGS normal and one WTS tumor)
 
 Keyword arguments:
   -h | --help:               Print this help message and exit.

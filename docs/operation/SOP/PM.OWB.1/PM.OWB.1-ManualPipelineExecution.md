@@ -24,7 +24,7 @@ This Pipeline Manager manages the execution of the Oncoanalyser WGTS DNA pipelin
 
 ## Procedure
 
-To initiate a pipeline execution we need to generate an initial DRAFT event. For more details consult the main [README](../../../../README.md).
+To initiate a pipeline execution we need to generate an initial DRAFT event. For more details consult the main [README](/README.md).
 For convenience we provide a shell script that generates and optionally submits an appropriate event.
 
 - familiarise yourself with the script: [generate-WRU-draft.sh](./generate-WRU-draft.sh)
