@@ -61,8 +61,8 @@ Example usage:
 bash generate-WRU-draft.sh tumor_library_id normal_library_id
 bash generate-WRU-draft.sh tumor_library_id normal_library_id \\
   --output-uri-prefix s3://project-bucket/analysis/oncoanalyser-wgts-dna-rna/ \\
-  --logs-uri-prefix s3://project-bucket/logs/oncoanalyser-wgts-dna-rna \\
-  --cache-uri-prefix s3://project-bucket/cache/oncoanalyser-wgts-dna-rna \\
+  --logs-uri-prefix s3://project-bucket/logs/oncoanalyser-wgts-dna-rna/ \\
+  --cache-uri-prefix s3://project-bucket/cache/oncoanalyser-wgts-dna-rna/ \\
   --project-id project-uuid-1234-abcd
 
 "
