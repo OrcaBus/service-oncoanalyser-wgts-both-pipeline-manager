@@ -10,6 +10,7 @@ LAMBDA_FUNCTION_NAME="WruDraftValidator"
 FORCE=false  # Use --force to set to true
 OUTPUT_URI_PREFIX=""
 LOGS_URI_PREFIX=""
+CACHE_URI_PREFIX=""
 PROJECT_ID=""
 
 # Workflow constants
@@ -34,6 +35,7 @@ generate-WRU-draft.sh (library_id)...
                       [-f | --force]
                       [-o | --output-uri-prefix <s3_uri>]
                       [-l | --logs-uri-prefix <s3_uri>]
+                      [-c | --cache-uri-prefix <s3_uri>]
                       [-p | --project-id <project_id>]
 
 Description:
@@ -47,6 +49,7 @@ Keyword arguments:
   -h | --help:               Print this help message and exit.
   -f | --force:              Don't confirm before pushing the event to EventBridge.
   -l | --logs-uri-prefix:    (Optional) S3 URI for logs (must end with a slash).
+  -c | --cache-uri-prefix:   (Optional) S3 URI for cache (must end with a slash).
   -o | --output-uri-prefix:  (Optional) S3 URI for outputs (must end with a slash).
   -p | --project-id:         (Optional) ICAv2 Project ID to associate with the workflow run
 
@@ -57,8 +60,9 @@ Environment:
 Example usage:
 bash generate-WRU-draft.sh tumor_library_id normal_library_id
 bash generate-WRU-draft.sh tumor_library_id normal_library_id \\
-  --output-uri-prefix s3://project-bucket/analysis/dragen-wgts-dna/ \\
-  --logs-uri-prefix s3://project-bucket/logs/dragen-wgts-dna \\
+  --output-uri-prefix s3://project-bucket/analysis/oncoanalyser-wgts-dna-rna/ \\
+  --logs-uri-prefix s3://project-bucket/logs/oncoanalyser-wgts-dna-rna \\
+  --cache-uri-prefix s3://project-bucket/cache/oncoanalyser-wgts-dna-rna \\
   --project-id project-uuid-1234-abcd
 
 "
@@ -205,6 +209,15 @@ while [[ $# -gt 0 ]]; do
     LOGS_URI_PREFIX="${1#*=}"
     shift
     ;;
+  # Cache URI prefix
+  -c|--cache-uri-prefix)
+    CACHE_URI_PREFIX="$2"
+    shift 2
+    ;;
+  -c=*|--cache-uri-prefix=*)
+    CACHE_URI_PREFIX="${1#*=}"
+    shift
+    ;;
   # Project ID
   -p|--project-id)
     PROJECT_ID="$2"
@@ -239,6 +252,7 @@ engine_parameters=$( \
   jq --null-input --raw-output --compact-output \
   --arg outputUriPrefix "${OUTPUT_URI_PREFIX}" \
   --arg logsUriPrefix "${LOGS_URI_PREFIX}" \
+  --arg cacheUriPrefix "${CACHE_URI_PREFIX}" \
   --arg projectId "${PROJECT_ID}" \
   --arg portalRunId "${portal_run_id}" \
   '
@@ -246,6 +260,7 @@ engine_parameters=$( \
     {
       "outputUri": ( if $outputUriPrefix != "" then ($outputUriPrefix + $portalRunId + "/") else "" end ),
       "logsUri": ( if $logsUriPrefix != "" then ($logsUriPrefix + $portalRunId + "/") else "" end ),
+      "cacheUri": ( if $cacheUriPrefix != "" then ($cacheUriPrefix + $portalRunId + "/") else "" end ),
       "projectId": $projectId
     } |
     # Remove empty values
@@ -343,6 +358,7 @@ while :; do
     exit 1
   fi
 
+  # Get the workflow run object
   workflow_run_object="$( \
     get_workflow_run "${portal_run_id}"
   )"
