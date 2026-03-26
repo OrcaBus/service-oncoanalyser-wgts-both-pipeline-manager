@@ -86,7 +86,7 @@ Keyword arguments:
   -p | --project-id=<project_id>                (Optional) ICAv2 Project ID to associate with the workflow run
   -s | --analysis-storage-size=<size>           (Optional) Set the analysis storage size (default SMALL), one of:
                                                   - SMALL / MEDIUM / LARGE / XLARGE / 2XLARGE / 3XLARGE
-  --save-draft-payload=<output_file>            (Optional) (Optional) Save the generated draft event to local file <output_file> after pushing to event bridge for record purposes.
+  --save-draft-payload=<output_file>            (Optional) Save the generated draft event to local file <output_file> after pushing to event bridge for record purposes.
   --workflow-version=<workflow_version>         (Optional) Override the default workflow version.
   --code-version=<code_version>                 (Optional) Override the default code version.
 
