@@ -128,21 +128,24 @@ compare_script_version_to_repo(){
   '
   # Read the document from the main branch
   repo_script_version="$( \
-    curl --silent --fail --location --show-error \
-      --header "Accept: text/html" \
-      --url "https://raw.githubusercontent.com/${GITHUB_REPO}/refs/heads/main/${THIS_SCRIPT_PATH}" | \
-    ( \
-      # Read through the whole document to prevent curl erroring out
-      tac | tac \
-    ) | \
     (
-      # Get the first occurence with grep -m1 (SOP_VERSION="YYYY.MM.DD")
-      # Remove the SOP_VERSION= prefix ("YYYY.MM.DD")
-      # Remove quotes (YYYY.MM.DD)
-      grep -m1 "SOP_VERSION" | \
-      sed 's/^SOP_VERSION=//' | \
-      jq --raw-output
-    ) \
+      curl --silent --fail --location --show-error \
+        --header "Accept: text/html" \
+        --url "https://raw.githubusercontent.com/${GITHUB_REPO}/refs/heads/main/${THIS_SCRIPT_PATH}" | \
+      ( \
+        # Read through the whole document to prevent curl erroring out
+        tac | tac \
+      ) | \
+      (
+        # Get the first occurrence with grep -m1 (SOP_VERSION="YYYY.MM.DD")
+        # Remove the SOP_VERSION= prefix ("YYYY.MM.DD")
+        # Remove quotes (YYYY.MM.DD)
+        grep -m1 "SOP_VERSION" | \
+        sed 's/^SOP_VERSION=//' | \
+        jq --raw-output
+      ) \
+    ) || \
+    echo "unknown"
   )"
 
   if [[ "${SOP_VERSION}" != "${repo_script_version}" ]]; then
@@ -405,8 +408,8 @@ while [[ $# -gt 0 ]]; do
       ;;
     # Output URI prefix
     -o|--output-uri-prefix)
-    OUTPUT_URI_PREFIX="$2"
-    shift 2
+      OUTPUT_URI_PREFIX="$2"
+      shift 2
     ;;
     -o=*|--output-uri-prefix=*)
       OUTPUT_URI_PREFIX="${1#*=}"
