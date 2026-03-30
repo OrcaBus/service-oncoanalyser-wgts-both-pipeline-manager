@@ -126,13 +126,23 @@ compare_script_version_to_repo(){
   : '
   Compare the version of this script to the version in the repo, and print a warning if they are different
   '
+  # Read the document from the main branch
   repo_script_version="$( \
     curl --silent --fail --location --show-error \
+      --header "Accept: text/html" \
       --url "https://raw.githubusercontent.com/${GITHUB_REPO}/refs/heads/main/${THIS_SCRIPT_PATH}" | \
+    ( \
+      # Read through the whole document to prevent curl erroring out
+      tac | tac \
+    ) | \
     (
+      # Get the first occurence with grep -m1 (SOP_VERSION="YYYY.MM.DD")
+      # Remove the SOP_VERSION= prefix ("YYYY.MM.DD")
+      # Remove quotes (YYYY.MM.DD)
       grep -m1 "SOP_VERSION" | \
-      cut -d'"' -f2
-    ) || echo "unknown"
+      sed 's/^SOP_VERSION=//' | \
+      jq --raw-output
+    ) \
   )"
 
   if [[ "${SOP_VERSION}" != "${repo_script_version}" ]]; then
@@ -148,7 +158,7 @@ check_binaries(){
   for binary in aws semver jq curl openssl awk; do
     if ! command -v "${binary}" > /dev/null 2>&1; then
       echo_stderr "Error: ${binary} is not installed. Please install ${binary} and try again. Exiting."
-      exit 1
+      return 1
     fi
   done
 
@@ -156,26 +166,26 @@ check_binaries(){
   jq_version="$(jq --version | cut -d'-' -f2)"
   if [[ "${jq_version}" =~ ^1.\d$ && ! "${jq_version}" == "1.7" ]]; then
     echo_stderr "Error: jq version 1.7 or higher is required. Please update jq and try again. Exiting."
-    exit 1
+    return 1
   fi
   # After version 1.7, jq changed their versioning to semver, so we can use semver to compare versions
   if [[ ! "$(semver compare "${jq_version}" "${MIN_REQUIREMENTS["jq"]}")" -ge 0 ]]; then
     echo_stderr "Error: jq version ${MIN_REQUIREMENTS["jq"]} or higher is required. Please update jq and try again. Exiting."
-    exit 1
+    return 1
   fi
 
   # Check aws cli version is 2.0.0 or higher, as we use the --cli-binary-format option which was added in 2.0.0
   aws_version="$(aws --version 2>&1 | awk '{print $1}' | cut -d'/' -f2)"
   if [[ ! "$(semver compare "${aws_version}" "${MIN_REQUIREMENTS["aws"]}")" -ge 0 ]]; then
     echo_stderr "Error: AWS CLI version ${MIN_REQUIREMENTS["aws"]} or higher is required. Please update AWS CLI and try again. Exiting."
-    exit 1
+    return 1
   fi
 
   # Check curl version is 7.76.0 or higher, as we use the --fail-with-body option which was added in 7.76.0
   curl_version="$(curl --version | head -n1 | awk '{print $2}')"
   if [[ ! "$(semver compare "${curl_version}" "${MIN_REQUIREMENTS["curl"]}")" -ge 0 ]]; then
     echo_stderr "Error: curl version ${MIN_REQUIREMENTS["curl"]} or higher is required. Please update curl and try again. Exiting."
-    exit 1
+    return 1
   fi
 }
 
@@ -251,6 +261,7 @@ get_cognito_user_pool_id_prefix(){
 get_library_obj_from_library_id(){
   local library_id="$1"
   curl --silent --fail --show-error --location \
+    --header "Accept: application/json" \
     --header "Authorization: Bearer ${PORTAL_TOKEN}" \
     --url "https://metadata.$(get_hostname_from_ssm)/api/v1/library?libraryId=${library_id}" | \
   jq --raw-output \
@@ -294,6 +305,7 @@ get_workflow(){
   curl --silent --fail --show-error --location \
     --request GET \
     --get \
+    --header "Accept: application/json" \
     --header "Authorization: Bearer ${PORTAL_TOKEN}" \
     --url "https://workflow.$(get_hostname_from_ssm)/api/v1/workflow" \
     --data "$( \
@@ -329,6 +341,7 @@ get_workflow_run(){
   curl --silent --fail --show-error --location \
     --request GET \
     --get \
+    --header "Accept: application/json" \
     --header "Authorization: Bearer ${PORTAL_TOKEN}" \
     --url "https://workflow.$(get_hostname_from_ssm)/api/v1/workflowrun?portalRunId=${portal_run_id}" | \
   jq --compact-output --raw-output \
@@ -395,78 +408,78 @@ while [[ $# -gt 0 ]]; do
     OUTPUT_URI_PREFIX="$2"
     shift 2
     ;;
-  -o=*|--output-uri-prefix=*)
-    OUTPUT_URI_PREFIX="${1#*=}"
-    shift
-    ;;
-  # Log URI prefix
-  -l|--logs-uri-prefix)
-    LOGS_URI_PREFIX="$2"
-    shift 2
-    ;;
-  -l=*|--logs-uri-prefix=*)
-    LOGS_URI_PREFIX="${1#*=}"
-    shift
-    ;;
-  # Cache URI prefix
-  -t|--cache-uri-prefix)
-    CACHE_URI_PREFIX="$2"
-    shift 2
-    ;;
-  -t=*|--cache-uri-prefix=*)
-    CACHE_URI_PREFIX="${1#*=}"
-    shift
-    ;;
-  # Project ID
-  -p|--project-id)
-    PROJECT_ID="$2"
-    shift 2
-    ;;
-  -p=*|--project-id=*)
-    PROJECT_ID="${1#*=}"
-    shift
-    ;;
-  # Analysis Storage Size
-  -s|--analysis-storage-size)
-    ANALYSIS_STORAGE_SIZE="$2"
-    shift 2
-    ;;
-  -s=*|--analysis-storage-size=*)
-    ANALYSIS_STORAGE_SIZE="${1#*=}"
-    shift
-    ;;
-  # Save draft payload to file
-  --save-draft-payload)
-    SAVE_DRAFT_PAYLOAD="$2"
-    shift 2
-    ;;
-  --save-draft-payload=*)
-    SAVE_DRAFT_PAYLOAD="${1#*=}"
-    shift
-    ;;
-  # Workflow version
-  --workflow-version)
-    WORKFLOW_VERSION="$2"
-    shift 2
-    ;;
-  --workflow-version=*)
-    WORKFLOW_VERSION="${1#*=}"
-    shift
-    ;;
-  # Code version
-  --code-version)
-    CODE_VERSION="$2"
-    shift 2
-    ;;
-  --code-version=*)
-    CODE_VERSION="${1#*=}"
-    shift
-    ;;
-  # Positional arguments (library IDs)
-  *)
-    LIBRARY_ID_ARRAY+=("$1")
-    shift
-    ;;
+    -o=*|--output-uri-prefix=*)
+      OUTPUT_URI_PREFIX="${1#*=}"
+      shift
+      ;;
+    # Log URI prefix
+    -l|--logs-uri-prefix)
+      LOGS_URI_PREFIX="$2"
+      shift 2
+      ;;
+    -l=*|--logs-uri-prefix=*)
+      LOGS_URI_PREFIX="${1#*=}"
+      shift
+      ;;
+    # Cache URI prefix
+    -t|--cache-uri-prefix)
+      CACHE_URI_PREFIX="$2"
+      shift 2
+      ;;
+    -t=*|--cache-uri-prefix=*)
+      CACHE_URI_PREFIX="${1#*=}"
+      shift
+      ;;
+    # Project ID
+    -p|--project-id)
+      PROJECT_ID="$2"
+      shift 2
+      ;;
+    -p=*|--project-id=*)
+      PROJECT_ID="${1#*=}"
+      shift
+      ;;
+    # Analysis Storage Size
+    -s|--analysis-storage-size)
+      ANALYSIS_STORAGE_SIZE="$2"
+      shift 2
+      ;;
+    -s=*|--analysis-storage-size=*)
+      ANALYSIS_STORAGE_SIZE="${1#*=}"
+      shift
+      ;;
+    # Save draft payload to file
+    --save-draft-payload)
+      SAVE_DRAFT_PAYLOAD="$2"
+      shift 2
+      ;;
+    --save-draft-payload=*)
+      SAVE_DRAFT_PAYLOAD="${1#*=}"
+      shift
+      ;;
+    # Workflow version
+    --workflow-version)
+      WORKFLOW_VERSION="$2"
+      shift 2
+      ;;
+    --workflow-version=*)
+      WORKFLOW_VERSION="${1#*=}"
+      shift
+      ;;
+    # Code version
+    --code-version)
+      CODE_VERSION="$2"
+      shift 2
+      ;;
+    --code-version=*)
+      CODE_VERSION="${1#*=}"
+      shift
+      ;;
+    # Positional arguments (library IDs)
+    *)
+      LIBRARY_ID_ARRAY+=("$1")
+      shift
+      ;;
   esac
 done
 
@@ -524,7 +537,12 @@ declare -A MIN_REQUIREMENTS=(
   ["aws"]="2.0.0"    # Because what are you doing still on V1?
   ["curl"]="7.76.0"  # For --fail-with-body option
 )
-check_binaries
+# Check binaries are installed
+if ! check_binaries; then
+  echo_stderr "Error: One or more required binaries are not installed. Please install the required binaries and try again. Exiting."
+  print_usage
+  exit 1
+fi
 
 # AWS Account ID by prefix
 declare -A PREFIX_BY_AWS_ACCOUNT_ID=(
@@ -664,10 +682,10 @@ if [[ -n "${SAVE_DRAFT_PAYLOAD}" ]]; then
 fi
 
 # Set the trap
-trap 'rm -rf "${LAMBDA_TMP_DIR:-}"' EXIT
+LAMBDA_TMP_DIR="$(mktemp -d "LAMBDA_TMP_DIR_XXXXXX")"
+trap 'rm -rf "${LAMBDA_TMP_DIR}"' EXIT
 
 # Push the event to EventBridge
-LAMBDA_TMP_DIR="$(mktemp -d "LAMBDA_TMP_DIR_XXXXXX")"
 LAMBDA_DATA_PIPE="${LAMBDA_TMP_DIR}/lambda_data_pipe"
 mkfifo "${LAMBDA_DATA_PIPE}"
 errors_json="$(mktemp -p "${LAMBDA_TMP_DIR}" "errors.XXXXXX.json")"
