@@ -6,7 +6,7 @@ find the draft workflow object for sash
 
 """
 # Standard imports
-from typing import List, Final
+from typing import List
 
 # Local imports
 from orcabus_api_tools.workflow import (
