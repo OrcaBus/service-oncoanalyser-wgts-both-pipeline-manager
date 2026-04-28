@@ -3,6 +3,7 @@
 """
 Generate a WRU event object with merged data
 """
+
 # Layer imports
 from orcabus_api_tools.workflow import (
     get_workflow_run_from_portal_run_id

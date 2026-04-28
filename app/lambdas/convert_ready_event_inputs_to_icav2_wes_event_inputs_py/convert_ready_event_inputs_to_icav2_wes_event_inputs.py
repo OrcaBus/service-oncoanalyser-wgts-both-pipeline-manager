@@ -56,6 +56,8 @@ WES Input Payload:
 {
     "mode": "wgts",
     "monochrome_logs": True,
+    "publish_dir_mode": "symlink",
+    "outdir": "out",
     "processes_manual": True,
     "processes_include": "lilac,neo,cuppa,orange",
     "samplesheet": [
@@ -277,7 +279,7 @@ WES Input Payload:
 """
 
 # Standard imports
-from typing import Dict, List
+from typing import Dict, List, Any
 from packaging.version import Version
 
 # Globals
@@ -286,6 +288,8 @@ DEFAULT_MONOCHROME_LOGS = True
 DEFAULT_GENOME = "GRCh38_hmf"
 DEFAULT_GENOME_VERSION = "38"
 DEFAULT_GENOME_TYPE = "no_alt"
+DEFAULT_PUBLISH_DIR_MODE = "symlink"
+DEFAULT_OUTDIR = "out"
 
 TUMOR_PHENOTYPE = "tumor"
 NORMAL_PHENOTYPE = "normal"
@@ -468,9 +472,9 @@ def camel_case_to_snake_case(name: str) -> str:
 
 
 def convert_ready_event_inputs_to_icav2_wes_event_inputs(
-        inputs: Dict[str, any],
+        inputs: Dict[str, Any],
         workflow_version: Version = Version(DEFAULT_WORKFLOW_VERSION)
-) -> Dict[str, any]:
+) -> Dict[str, Any]:
     """
     Convert the ready event inputs to ICAv2 WES event inputs.
     """
@@ -515,6 +519,8 @@ def convert_ready_event_inputs_to_icav2_wes_event_inputs(
         {
             "mode": inputs.get("mode", DEFAULT_MODE),
             "monochrome_logs": inputs.get("monochromeLogs", DEFAULT_MONOCHROME_LOGS),
+            "publish_dir_mode": inputs.get("publishDirMode", DEFAULT_PUBLISH_DIR_MODE),
+            "outdir": inputs.get("outdir", DEFAULT_OUTDIR),
             "samplesheet": samplesheet,
             "genome": inputs.get("genome", DEFAULT_GENOME),
             "genome_version": inputs.get("genomeVersion", DEFAULT_GENOME_VERSION),
