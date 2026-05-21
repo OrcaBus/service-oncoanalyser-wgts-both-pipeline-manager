@@ -1,2 +1,5 @@
 allowBuilds:
-  unrs-resolver: false
+  unrs-resolver: true
+minimumReleaseAgeExclude:
+  - aws-cdk-lib@2.256.1
+  - aws-cdk@2.1124.1
