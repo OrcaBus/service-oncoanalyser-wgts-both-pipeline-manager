@@ -31,13 +31,15 @@ export class StatelessApplicationStack extends cdk.Stack {
     );
 
     // Build the lambdas
-    const lambdas = buildAllLambdas(this);
+    const lambdas = buildAllLambdas(this, {
+      testDataBucketName: props.testDataBucketName,
+      refDataBucketName: props.refDataBucketName,
+    });
 
     // Build the state machines
     const stateMachines = buildAllStepFunctions(this, {
       lambdaObjects: lambdas,
       eventBus: orcabusMainEventBus,
-      isNewWorkflowManagerDeployed: props.isNewWorkflowManagerDeployed,
       ssmParameterPaths: props.ssmParameterPaths,
     });
 
