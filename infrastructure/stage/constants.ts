@@ -3,6 +3,10 @@ import path from 'path';
 import { StageName } from '@orcabus/platform-cdk-constructs/shared-config/accounts';
 import { Genome, NotInBuiltInHmfReferenceGenomesType, WorkflowVersionType } from './interfaces';
 import { DATA_SCHEMA_REGISTRY_NAME } from '@orcabus/platform-cdk-constructs/shared-config/event-bridge';
+import {
+  REFERENCE_DATA_BUCKET,
+  TEST_DATA_BUCKET,
+} from '@orcabus/platform-cdk-constructs/shared-config/s3';
 
 export const APP_ROOT = path.join(__dirname, '../../app');
 export const LAMBDA_DIR = path.join(APP_ROOT, 'lambdas');
@@ -164,3 +168,7 @@ export const NEW_WORKFLOW_MANAGER_IS_DEPLOYED: Record<StageName, boolean> = {
 
 // Used to group event rules and step functions
 export const STACK_PREFIX = 'orca-onco-wgts-both';
+
+/* Buckets */
+export const TEST_DATA_BUCKET_NAME = TEST_DATA_BUCKET;
+export const REF_DATA_BUCKET_NAME = REFERENCE_DATA_BUCKET;
