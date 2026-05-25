@@ -132,23 +132,16 @@ def handler(event, context) -> Dict[str, bool]:
         schema_name=schema_name
     )
 
-    # Get the draft schema from the schema registry
+    # Validate the draft schema against the current schema
+    is_valid_schema = validate_draft_schema(
+        current_schema,
+        # Assuming the event contains the draft schema as a JSON string
+        json.dumps(payload_data),
+        workflow_run_id=workflow_run_id,
+        comment_error=comment_error
+    )
+
+    # Return if the schema is not valid
     return {
-        "isValid": validate_draft_schema(
-            current_schema,
-            # Assuming the event contains the draft schema as a JSON string
-            json.dumps(event)
-        )
+        "isValid": is_valid_schema
     }
-
-
-# if __name__ == "__main__":
-#     from os import environ
-#     import json
-#     environ['AWS_PROFILE'] = 'umccr-development'
-#     environ["SSM_REGISTRY_NAME"] = '/orcabus/workflows/dragen-wgts-dna/schemas/registry'
-#     environ["SSM_SCHEMA_NAME"] = '/orcabus/workflows/dragen-wgts-dna/schemas/dragen-wgts-dna-complete-data-draft/latest'
-#     print(json.dumps(
-#         handler({}, None),
-#         indent=4
-#     ))
