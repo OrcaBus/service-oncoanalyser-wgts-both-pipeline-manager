@@ -73,8 +73,6 @@ function createStateMachineDefinitionSubstitutions(props: BuildStepFunctionProps
     definitionSubstitutions['__icav2_wes_request_detail_type__'] = ICAV2_WES_REQUEST_DETAIL_TYPE;
     definitionSubstitutions['__stack_source__'] = EVENT_SOURCE;
     definitionSubstitutions['__ready_event_status__'] = READY_STATUS;
-    definitionSubstitutions['__new_workflow_manager_is_deployed__'] =
-      props.isNewWorkflowManagerDeployed.toString();
   }
 
   if (sfnRequirements.needsSsmParameterStoreAccess) {
@@ -209,7 +207,6 @@ export function buildAllStepFunctions(
         stateMachineName: stepFunctionName,
         lambdaObjects: props.lambdaObjects,
         eventBus: props.eventBus,
-        isNewWorkflowManagerDeployed: props.isNewWorkflowManagerDeployed,
         ssmParameterPaths: props.ssmParameterPaths,
       })
     );
