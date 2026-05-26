@@ -4,6 +4,7 @@
 set -euo pipefail
 
 # Globals
+INPUT_DATA_FILE=""
 LAMBDA_FUNCTION_NAME="WruDraftValidator"
 HOSTNAME=""
 
@@ -25,7 +26,7 @@ PAYLOAD_VERSION="2025.08.05"
 ANALYSIS_STORAGE_SIZE="SMALL"
 
 # SOP constants
-SOP_VERSION="2026.03.05"
+SOP_VERSION="2026.05.26"
 SOP_ID="PM.OWB.1"
 GITHUB_REPO="OrcaBus/service-oncoanalyser-wgts-both-pipeline-manager"
 THIS_SCRIPT_PATH="docs/operation/SOP/${SOP_ID}/generate-WRU-draft.sh"
@@ -60,6 +61,7 @@ generate-WRU-draft.sh (library_id)...
                       [--save-draft-payload <output_file>]
                       [--workflow-version <workflow_version>]
                       [--code-version <code_version>]
+                      [--input-data <input_data_path>]
 
 Description:
 Run this script to generate a draft WorkflowRunUpdate event for the specified library IDs.
@@ -76,6 +78,16 @@ The output uri prefix, cache uri and logs uri prefixes must be set to a location
 Positional arguments:
   library_id:   One or more library IDs to link to the WorkflowRunUpdate event.
 
+Input data note:
+The populate draft data service will try to auto-populate inputs based on the information it already has.
+This may have unintended consequences if there exists two downstream analyses and you want inputs from one specific analysis.
+In this circumstance it is recommended to use the '--input-data <json_file>' to generate an existing data object to populate, for example:
+{
+  \"inputs\": {
+    \"tumorDnaBamUri\": \"s3://path/to/specific/tumor.bam\"
+  }
+}
+
 Keyword arguments:
   -h | --help                                   Print this help message and exit.
   -c | --comment                                (Required) A comment to add to the payload, which will be visible in the workflow run details in OrcaUI.
@@ -89,6 +101,8 @@ Keyword arguments:
   --save-draft-payload=<output_file>            (Optional) Save the generated draft event to local file <output_file> after pushing to event bridge for record purposes.
   --workflow-version=<workflow_version>         (Optional) Override the default workflow version.
   --code-version=<code_version>                 (Optional) Override the default code version.
+  --input-data=<input_data_file>                (Optional) Add existing input data to the data section of the payload.
+                                                           This might be used to explicitly set input files
 
 Environment:
   PORTAL_TOKEN: (Required) Your personal portal token from https://portal.${hostname}/
@@ -478,6 +492,15 @@ while [[ $# -gt 0 ]]; do
       CODE_VERSION="${1#*=}"
       shift
       ;;
+    # Input data
+    --input-data)
+      INPUT_DATA_FILE="$2"
+      shift 2
+      ;;
+    --input-data=*)
+      INPUT_DATA_FILE="${1#*=}"
+      shift
+      ;;
     # Positional arguments (library IDs)
     *)
       LIBRARY_ID_ARRAY+=("$1")
@@ -618,25 +641,47 @@ fi
 echo_stderr "Generating engine parameters"
 engine_parameters=$( \
   jq --null-input --raw-output --compact-output \
-  --arg outputUriPrefix "${OUTPUT_URI_PREFIX}" \
-  --arg logsUriPrefix "${LOGS_URI_PREFIX}" \
-  --arg cacheUriPrefix "${CACHE_URI_PREFIX}" \
-  --arg projectId "${PROJECT_ID}" \
-  --arg portalRunId "${portal_run_id}" \
-  --arg analysisStorageSize "${ANALYSIS_STORAGE_SIZE}" \
-  '
-    # Get the engine parameters
-    {
-      "outputUri": ( if $outputUriPrefix != "" then ($outputUriPrefix + $portalRunId + "/") else "" end ),
-      "logsUri": ( if $logsUriPrefix != "" then ($logsUriPrefix + $portalRunId + "/") else "" end ),
-      "cacheUri": ( if $cacheUriPrefix != "" then ($cacheUriPrefix + $portalRunId + "/") else "" end ),
-      "projectId": $projectId,
-      "analysisStorageSize": $analysisStorageSize
-    } |
-    # Remove empty values
-    with_entries(select(.value != ""))
-  ' \
+    --arg outputUriPrefix "${OUTPUT_URI_PREFIX}" \
+    --arg logsUriPrefix "${LOGS_URI_PREFIX}" \
+    --arg cacheUriPrefix "${CACHE_URI_PREFIX}" \
+    --arg projectId "${PROJECT_ID}" \
+    --arg portalRunId "${portal_run_id}" \
+    --arg analysisStorageSize "${ANALYSIS_STORAGE_SIZE}" \
+    '
+      # Get the engine parameters
+      {
+        "outputUri": ( if $outputUriPrefix != "" then ($outputUriPrefix + $portalRunId + "/") else "" end ),
+        "logsUri": ( if $logsUriPrefix != "" then ($logsUriPrefix + $portalRunId + "/") else "" end ),
+        "cacheUri": ( if $cacheUriPrefix != "" then ($cacheUriPrefix + $portalRunId + "/") else "" end ),
+        "projectId": $projectId,
+        "analysisStorageSize": $analysisStorageSize
+      } |
+      # Remove empty values
+      with_entries(select(.value != ""))
+    ' \
 )
+
+# Check for existing input data
+if [[ -n "${INPUT_DATA_FILE}" ]]; then
+  # Check if input data file exists
+  if [[ ! -f "${INPUT_DATA_FILE}" ]]; then
+    echo_stderr "${INPUT_DATA_FILE} does not exist"
+    print_usage
+    exit 1
+  fi
+
+  # Check input data is in json format
+  if ! jq -e 'type == "object"' < "${INPUT_DATA_FILE}" >/dev/null 2>&1; then
+    echo_stderr "${INPUT_DATA_FILE} is not in json format"
+    print_usage
+    exit 1
+  fi
+
+  # Load in input data
+  input_data_json_str="$(jq < "${INPUT_DATA_FILE}")"
+else
+  input_data_json_str="null"
+fi
 
 # Generate the event
 lambda_payload="$( \
@@ -646,14 +691,15 @@ lambda_payload="$( \
     --arg portalRunId "${portal_run_id}" \
     --argjson libraries "${libraries}" \
     --argjson engineParameters "${engine_parameters}" \
+    --argjson inputData "${input_data_json_str}" \
     '
-    {
-      "status": "DRAFT",
-      "timestamp": (now | todateiso8601),
-      "workflow": $workflow,
-      "workflowRunName": ("umccr--manual--" + $workflow["name"] + "--" + ($workflow["version"] | gsub("\\."; "-")) + "--" + $portalRunId),
-      "portalRunId": $portalRunId,
-      "libraries": $libraries,
+      {
+        "status": "DRAFT",
+        "timestamp": (now | todateiso8601),
+        "workflow": $workflow,
+        "workflowRunName": ("umccr--manual--" + $workflow["name"] + "--" + ($workflow["version"] | gsub("\\."; "-")) + "--" + $portalRunId),
+        "portalRunId": $portalRunId,
+        "libraries": $libraries,
       } |
       if ( ($engineParameters | length) > 0 ) then
         .["payload"] = {
@@ -662,6 +708,22 @@ lambda_payload="$( \
             "engineParameters": $engineParameters
           }
         }
+      end |
+      # If we have input data
+      if $inputData then
+        # Initialise payload if not set
+        if (.["payload"] | not) then
+          .["payload"] = {}
+        end |
+        # Set payload version
+        .["payload"]["version"] = $payloadVersion |
+        # If payload data already exists we need to merge
+        if .["payload"]["data"] then
+          .["payload"]["data"] = ($inputData * .["payload"]["data"])
+        # Otherwise just use the input json data
+        else
+          .["payload"]["data"] = $inputData
+        end
       end
     ' \
 )"
@@ -685,10 +747,10 @@ if [[ -n "${SAVE_DRAFT_PAYLOAD}" ]]; then
 fi
 
 # Set the trap
-LAMBDA_TMP_DIR="$(mktemp -d "LAMBDA_TMP_DIR_XXXXXX")"
-trap 'rm -rf "${LAMBDA_TMP_DIR}"' EXIT
+trap 'if [[ -n "${LAMBDA_TMP_DIR:-}" ]]; then rm -rf -- "${LAMBDA_TMP_DIR}"; fi' EXIT
 
 # Push the event to EventBridge
+LAMBDA_TMP_DIR="$(mktemp -d "LAMBDA_TMP_DIR_XXXXXX")"
 LAMBDA_DATA_PIPE="${LAMBDA_TMP_DIR}/lambda_data_pipe"
 mkfifo "${LAMBDA_DATA_PIPE}"
 errors_json="$(mktemp -p "${LAMBDA_TMP_DIR}" "errors.XXXXXX.json")"
@@ -770,4 +832,4 @@ if ! comment_response="$(generate_workflow_comment "${workflow_run_orcabus_id}" 
 fi
 
 echo_stderr "Workflow Run Creation Event complete!"
-echo_stderr "Please head to 'https://orcaui.$(get_hostname_from_ssm)/runs/workflow/${workflow_run_orcabus_id}' to track the status of the workflow run"
+echo_stderr "Please head to 'https://orcaui.$(get_hostname_from_ssm)/workflows/workflowRuns/${workflow_run_orcabus_id}' to track the status of the workflow run"
