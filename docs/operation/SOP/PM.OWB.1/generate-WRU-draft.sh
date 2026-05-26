@@ -4,6 +4,7 @@
 set -euo pipefail
 
 # Globals
+INPUT_DATA_FILE=""
 LAMBDA_FUNCTION_NAME="WruDraftValidator"
 HOSTNAME=""
 
@@ -60,6 +61,7 @@ generate-WRU-draft.sh (library_id)...
                       [--save-draft-payload <output_file>]
                       [--workflow-version <workflow_version>]
                       [--code-version <code_version>]
+                      [--input-data <input_data_path>]
 
 Description:
 Run this script to generate a draft WorkflowRunUpdate event for the specified library IDs.
@@ -76,6 +78,16 @@ The output uri prefix, cache uri and logs uri prefixes must be set to a location
 Positional arguments:
   library_id:   One or more library IDs to link to the WorkflowRunUpdate event.
 
+Input data note:
+The populate draft data service will try to auto-populate inputs based on the information it already has.
+This may have unintended consequences if there exists two downstream analyses and you want inputs from one specific analysis.
+In this circumstance it is recommended to use the '--input-data <json_file>' to generate an existing data object to populate, for example:
+{
+  \"inputs\": {
+    \"tumorDnaBamUri\": \"s3://path/to/specific/tumor.bam\"
+  }
+}
+
 Keyword arguments:
   -h | --help                                   Print this help message and exit.
   -c | --comment                                (Required) A comment to add to the payload, which will be visible in the workflow run details in OrcaUI.
@@ -89,6 +101,8 @@ Keyword arguments:
   --save-draft-payload=<output_file>            (Optional) Save the generated draft event to local file <output_file> after pushing to event bridge for record purposes.
   --workflow-version=<workflow_version>         (Optional) Override the default workflow version.
   --code-version=<code_version>                 (Optional) Override the default code version.
+  --input-data=<input_data_file>                (Optional) Add existing input data to the data section of the payload.
+                                                           This might be used to explicitly set input files
 
 Environment:
   PORTAL_TOKEN: (Required) Your personal portal token from https://portal.${hostname}/
@@ -476,6 +490,15 @@ while [[ $# -gt 0 ]]; do
       ;;
     --code-version=*)
       CODE_VERSION="${1#*=}"
+      shift
+      ;;
+    # Input data
+    --input-data)
+      INPUT_DATA_FILE="$2"
+      shift 2
+      ;;
+    --input-data=*)
+      INPUT_DATA_FILE="${1#*=}"
       shift
       ;;
     # Positional arguments (library IDs)
