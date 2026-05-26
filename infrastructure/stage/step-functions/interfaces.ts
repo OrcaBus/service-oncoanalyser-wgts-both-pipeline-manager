@@ -40,24 +40,22 @@ export interface StepFunctionRequirements {
   needsSsmParameterStoreAccess?: boolean;
 }
 
-export interface StepFunctionInput {
-  stateMachineName: StateMachineName;
-}
-
-export interface BuildStepFunctionProps extends StepFunctionInput {
+export interface BuildStepFunctionsProps {
   lambdaObjects: LambdaObject[];
   eventBus: IEventBus;
-  isNewWorkflowManagerDeployed: boolean;
   ssmParameterPaths: SsmParameterPaths;
 }
 
-export interface StepFunctionObject extends StepFunctionInput {
+export interface BuildStepFunctionProps extends BuildStepFunctionsProps {
+  stateMachineName: StateMachineName;
+}
+
+export interface StepFunctionObject {
+  stateMachineName: StateMachineName;
   sfnObject: StateMachine;
 }
 
 export type WireUpPermissionsProps = BuildStepFunctionProps & StepFunctionObject;
-
-export type BuildStepFunctionsProps = Omit<BuildStepFunctionProps, 'stateMachineName'>;
 
 export const stepFunctionsRequirementsMap: Record<StateMachineName, StepFunctionRequirements> = {
   // Glue code
@@ -112,6 +110,7 @@ export const stepFunctionToLambdasMap: Record<StateMachineName, LambdaName[]> = 
   validateDraftToReady: [
     // Validation
     'validateDraftDataCompleteSchema',
+    'postSchemaValidation',
   ],
   readyEventToIcav2WesRequestEvent: [
     // Ready to ICAv2 WES lambdas

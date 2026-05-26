@@ -95,7 +95,11 @@ def extend_s3_uri_path(analysis_root_prefix: str, path: str) -> str:
 
 
 def get_path_prefix_from_path_key(
-        object_: Union[TUMOR_DNA, NORMAL_DNA, TUMOR_RNA],
+        object_: Union[
+            TumorDnaInputs,
+            NormalDnaInputs,
+            TumorRnaInputs,
+        ],
         key: str,
         relative_output_path: str,
         tumor_dna_library_id: Optional[str] = None,
@@ -244,9 +248,9 @@ def get_inputs(
         tumor_dna_library_id: Optional[str] = None,
         normal_dna_library_id: Optional[str] = None,
         tumor_rna_library_id: Optional[str] = None,
-        tumor_dna_dict: TumorDnaInputs = None,
-        normal_dna_dict: NormalDnaInputs = None,
-        tumor_rna_dict: TumorRnaInputs = None,
+        tumor_dna_dict: Optional[TumorDnaInputs] = None,
+        normal_dna_dict: Optional[NormalDnaInputs] = None,
+        tumor_rna_dict: Optional[TumorRnaInputs] = None,
 ) -> Dict[str, Union[TumorDnaInputs, NormalDnaInputs, TumorRnaInputs]]:
     # Portal run id prefix
     portal_run_id_analysis_root_prefix = get_portal_run_id_root_prefix(portal_run_id)
@@ -291,7 +295,7 @@ def get_inputs(
                 relative_output_path=output_relative_path,
                 tumor_dna_library_id=tumor_dna_library_id,
                 normal_dna_library_id=normal_dna_library_id,
-                tumor_dna_inputs_dict=tumor_dna_dict,
+                tumor_dna_inputs_dict=cast(TumorDnaInputs, tumor_dna_dict),
             )
         }
     # DNA NORMAL
@@ -305,7 +309,7 @@ def get_inputs(
                 relative_output_path=output_relative_path,
                 tumor_dna_library_id=tumor_dna_library_id,
                 normal_dna_library_id=normal_dna_library_id,
-                normal_dna_inputs_dict=normal_dna_dict,
+                normal_dna_inputs_dict=cast(NormalDnaInputs, normal_dna_dict),
             )
         }
     # RNA TUMOR
@@ -317,7 +321,7 @@ def get_inputs(
                 portal_run_id_analysis_root_prefix=portal_run_id_analysis_root_prefix,
                 relative_output_path=output_relative_path,
                 tumor_rna_library_id=tumor_rna_library_id,
-                tumor_rna_inputs_dict=tumor_rna_dict,
+                tumor_rna_inputs_dict=cast(TumorRnaInputs, tumor_rna_dict),
             )
         }
     raise ValueError("Invalid combination of sample_type and phenotype")
@@ -356,7 +360,7 @@ def handler(event, context):
     tumor_rna_library_id: Optional[str] = event.get('tumorRnaLibraryId', None)
 
     tumor_dna_dict, normal_dna_dict = handle_templates_by_version(portal_run_id)
-    tumor_rna_dict = TUMOR_RNA.copy()
+    tumor_rna_dict: TumorRnaInputs = TUMOR_RNA.copy()
 
     return get_inputs(
         portal_run_id=portal_run_id,

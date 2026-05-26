@@ -10,8 +10,10 @@ from typing import List, Literal
 from orcabus_api_tools.metadata import get_library_from_library_orcabus_id
 from orcabus_api_tools.metadata.models import LibraryBase
 
+# Literals
 Phenotype = Literal['tumor', 'normal']
 SampleType = Literal['WGS', 'WTS']
+
 
 def handler(event, context):
     """

@@ -5,6 +5,7 @@ Interfaces for the application
  */
 
 import { SsmParameterPaths, SsmParameterValues } from './ssm/interfaces';
+import { StageName } from '@orcabus/platform-cdk-constructs/shared-config/accounts';
 
 /**
  * Stateful application stack interface.
@@ -12,7 +13,6 @@ import { SsmParameterPaths, SsmParameterValues } from './ssm/interfaces';
 
 export interface StatefulApplicationStackConfig {
   // Values
-  // Detail
   ssmParameterValues: SsmParameterValues;
 
   // Keys
@@ -26,15 +26,21 @@ export interface StatelessApplicationStackConfig {
   // Event Stuff
   eventBusName: string;
 
-  // Workflow manager stuff
-  isNewWorkflowManagerDeployed: boolean;
-
-  // SSM Parameter pathsd
+  // SSM Parameter paths
   ssmParameterPaths: SsmParameterPaths;
+
+  // Bucket Names
+  testDataBucketName: string;
+  refDataBucketName: string;
+
+  // Stage Name
+  stageName: StageName;
 }
 
 /* Set versions */
 export type WorkflowVersionType = '2.0.0' | '2.1.0' | '2.2.0';
+export type PayloadVersionType = '2025.08.05';
+export const payloadVersionList: PayloadVersionType[] = ['2025.08.05'];
 
 /* Set genomes */
 export type GenomeType = 'GRCh38_umccr' | 'GRCh38_hmf';

@@ -46,7 +46,7 @@ function createStateMachineDefinitionSubstitutions(props: BuildStepFunctionProps
   for (const lambdaObject of lambdaFunctions) {
     const sfnSubtitutionKey = `__${camelCaseToSnakeCase(lambdaObject.lambdaName)}_lambda_function_arn__`;
     definitionSubstitutions[sfnSubtitutionKey] =
-      lambdaObject.lambdaFunction.currentVersion.functionArn;
+      lambdaObject.lambdaFunction.latestVersion.functionArn;
   }
 
   /* Common substitutions */
@@ -73,8 +73,6 @@ function createStateMachineDefinitionSubstitutions(props: BuildStepFunctionProps
     definitionSubstitutions['__icav2_wes_request_detail_type__'] = ICAV2_WES_REQUEST_DETAIL_TYPE;
     definitionSubstitutions['__stack_source__'] = EVENT_SOURCE;
     definitionSubstitutions['__ready_event_status__'] = READY_STATUS;
-    definitionSubstitutions['__new_workflow_manager_is_deployed__'] =
-      props.isNewWorkflowManagerDeployed.toString();
   }
 
   if (sfnRequirements.needsSsmParameterStoreAccess) {
@@ -120,8 +118,18 @@ function wireUpStateMachinePermissions(props: WireUpPermissionsProps): void {
 
   /* Allow the state machine to invoke the lambda function */
   for (const lambdaObject of lambdaFunctions) {
-    lambdaObject.lambdaFunction.currentVersion.grantInvoke(props.sfnObject);
+    lambdaObject.lambdaFunction.grantInvoke(props.sfnObject);
   }
+  NagSuppressions.addResourceSuppressions(
+    props.sfnObject,
+    [
+      {
+        id: 'AwsSolutions-IAM5',
+        reason: 'We need to give access to the full lambda version prefix',
+      },
+    ],
+    true
+  );
 
   // Needs Event put permissions
   if (sfnRequirements.needsEventPutPermission) {
@@ -159,7 +167,7 @@ function buildStepFunction(scope: Construct, props: BuildStepFunctionProps): Ste
 
   /* Create the state machine definition substitutions */
   const stateMachine = new sfn.StateMachine(scope, props.stateMachineName, {
-    stateMachineName: `${STACK_PREFIX}-${props.stateMachineName}`,
+    stateMachineName: `${STACK_PREFIX}--${props.stateMachineName}`,
     definitionBody: sfn.DefinitionBody.fromFile(
       path.join(STEP_FUNCTIONS_DIR, sfnNameToSnakeCase + `_sfn_template.asl.json`)
     ),
@@ -209,7 +217,6 @@ export function buildAllStepFunctions(
         stateMachineName: stepFunctionName,
         lambdaObjects: props.lambdaObjects,
         eventBus: props.eventBus,
-        isNewWorkflowManagerDeployed: props.isNewWorkflowManagerDeployed,
         ssmParameterPaths: props.ssmParameterPaths,
       })
     );
