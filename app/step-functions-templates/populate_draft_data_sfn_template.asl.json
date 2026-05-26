@@ -313,7 +313,7 @@
               "Choices": [
                 {
                   "Next": "Set fastq rgid list",
-                  "Condition": "{% $tags.normalDnaFastqRgidList ? true : false %}"
+                  "Condition": "{% $exists($tags.normalDnaFastqRgidList) ? true : false %}"
                 }
               ],
               "Default": "Get fastq list rgids from normal libraries"
@@ -361,7 +361,7 @@
               "Choices": [
                 {
                   "Next": "Tumor dna Fastq Rgid list set",
-                  "Condition": "{% $tags.tumorDnaLibraryId ? true : false %}",
+                  "Condition": "{% $exists($tags.tumorDnaLibraryId) ? true : false %}",
                   "Comment": "Has tumor library id"
                 }
               ],
@@ -372,7 +372,7 @@
               "Choices": [
                 {
                   "Next": "Set tumor fastq rgid list",
-                  "Condition": "{% $tags.tumorDnaFastqRgidList ? true : false %}"
+                  "Condition": "{% $exists($tags.tumorDnaFastqRgidList) ? true : false %}"
                 }
               ],
               "Default": "Get fastq list rgids from tumor dna libraries"
@@ -425,7 +425,7 @@
               "Choices": [
                 {
                   "Next": "Tumor rna fastq rgid list set",
-                  "Condition": "{% $tags.tumorRnaLibraryId ? true : false %}"
+                  "Condition": "{% $exists($tags.tumorRnaLibraryId) ? true : false %}"
                 }
               ],
               "Default": "tumorRnaFastqRgidList is empty"
@@ -435,7 +435,7 @@
               "Choices": [
                 {
                   "Next": "Set tumor rna libraries",
-                  "Condition": "{% $tags.tumorRnaFastqRgidList ? true : false %}"
+                  "Condition": "{% $exists($tags.tumorRnaFastqRgidList) ? true : false %}"
                 }
               ],
               "Default": "Get fastq list rgids from tumor rna libraries"
@@ -515,10 +515,21 @@
           }
         }
       ],
-      "Next": "Get libraries with readsets",
+      "Next": "Tags or Engine Parameters have changed",
       "Assign": {
         "tags": "{% /* https://try.jsonata.org/05K2l3beH */\n/* List to merge together */\n[\n    /* Start with the draft tags */\n    $tags,\n    /* Merge the results list together */\n    $merge($states.result)\n] \n/* Then merge these initial tags with states.result  */\n~> $merge\n/* Remove any keys with values */\n~> $sift(function($v, $k){$v != null}) %}"
       }
+    },
+    "Tags or Engine Parameters have changed": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Comment": "Tags or engine parameters have changed",
+          "Next": "Make new WRU event",
+          "Condition": "{% ( ( $data.tags ? $data.tags : {} ) = $tags ~> $not ) or\n( ( $data.engineParameters ? $data.engineParameters : {} ) = $engineParameters ~> $not )\n %}"
+        }
+      ],
+      "Default": "Get libraries with readsets"
     },
     "Get libraries with readsets": {
       "Type": "Parallel",
@@ -827,14 +838,14 @@
                   }
                 },
                 {
-                  "StartAt": "Has tumor rgid list",
+                  "StartAt": "Has tumor dna library id",
                   "States": {
-                    "Has tumor rgid list": {
+                    "Has tumor dna library id": {
                       "Type": "Choice",
                       "Choices": [
                         {
                           "Next": "Get tumor dna inputs from portal run id",
-                          "Condition": "{% $tags.tumorDnaFastqRgidList ? true : false %}"
+                          "Condition": "{% $tags.tumorDnaLibraryId ? true : false %}"
                         }
                       ],
                       "Default": "Pass"
