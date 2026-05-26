@@ -25,7 +25,7 @@ PAYLOAD_VERSION="2025.08.05"
 ANALYSIS_STORAGE_SIZE="SMALL"
 
 # SOP constants
-SOP_VERSION="2026.03.05"
+SOP_VERSION="2026.05.26"
 SOP_ID="PM.OWB.1"
 GITHUB_REPO="OrcaBus/service-oncoanalyser-wgts-both-pipeline-manager"
 THIS_SCRIPT_PATH="docs/operation/SOP/${SOP_ID}/generate-WRU-draft.sh"
