@@ -838,9 +838,9 @@
                   }
                 },
                 {
-                  "StartAt": "Has tumor rgid list",
+                  "StartAt": "Has tumor dna library id",
                   "States": {
-                    "Has tumor rgid list": {
+                    "Has tumor dna library id": {
                       "Type": "Choice",
                       "Choices": [
                         {
