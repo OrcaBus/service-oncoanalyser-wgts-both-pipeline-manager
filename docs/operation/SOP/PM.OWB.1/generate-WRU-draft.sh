@@ -747,10 +747,10 @@ if [[ -n "${SAVE_DRAFT_PAYLOAD}" ]]; then
 fi
 
 # Set the trap
-LAMBDA_TMP_DIR="$(mktemp -d "LAMBDA_TMP_DIR_XXXXXX")"
-trap 'rm -rf "${LAMBDA_TMP_DIR}"' EXIT
+trap 'rm -rf "${LAMBDA_TMP_DIR:-}"' EXIT
 
 # Push the event to EventBridge
+LAMBDA_TMP_DIR="$(mktemp -d "LAMBDA_TMP_DIR_XXXXXX")"
 LAMBDA_DATA_PIPE="${LAMBDA_TMP_DIR}/lambda_data_pipe"
 mkfifo "${LAMBDA_DATA_PIPE}"
 errors_json="$(mktemp -p "${LAMBDA_TMP_DIR}" "errors.XXXXXX.json")"
@@ -832,4 +832,4 @@ if ! comment_response="$(generate_workflow_comment "${workflow_run_orcabus_id}" 
 fi
 
 echo_stderr "Workflow Run Creation Event complete!"
-echo_stderr "Please head to 'https://orcaui.$(get_hostname_from_ssm)/runs/workflow/${workflow_run_orcabus_id}' to track the status of the workflow run"
+echo_stderr "Please head to 'https://orcaui.$(get_hostname_from_ssm)/workflows/workflowRuns/${workflow_run_orcabus_id}' to track the status of the workflow run"
