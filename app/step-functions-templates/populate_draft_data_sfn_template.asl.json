@@ -313,7 +313,7 @@
               "Choices": [
                 {
                   "Next": "Set fastq rgid list",
-                  "Condition": "{% $tags.normalDnaFastqRgidList ? true : false %}"
+                  "Condition": "{% $exists($tags.normalDnaFastqRgidList) ? true : false %}"
                 }
               ],
               "Default": "Get fastq list rgids from normal libraries"
@@ -361,7 +361,7 @@
               "Choices": [
                 {
                   "Next": "Tumor dna Fastq Rgid list set",
-                  "Condition": "{% $tags.tumorDnaLibraryId ? true : false %}",
+                  "Condition": "{% $exists($tags.tumorDnaLibraryId) ? true : false %}",
                   "Comment": "Has tumor library id"
                 }
               ],
@@ -372,7 +372,7 @@
               "Choices": [
                 {
                   "Next": "Set tumor fastq rgid list",
-                  "Condition": "{% $tags.tumorDnaFastqRgidList ? true : false %}"
+                  "Condition": "{% $exists($tags.tumorDnaFastqRgidList) ? true : false %}"
                 }
               ],
               "Default": "Get fastq list rgids from tumor dna libraries"
@@ -425,7 +425,7 @@
               "Choices": [
                 {
                   "Next": "Tumor rna fastq rgid list set",
-                  "Condition": "{% $tags.tumorRnaLibraryId ? true : false %}"
+                  "Condition": "{% $exists($tags.tumorRnaLibraryId) ? true : false %}"
                 }
               ],
               "Default": "tumorRnaFastqRgidList is empty"
@@ -435,7 +435,7 @@
               "Choices": [
                 {
                   "Next": "Set tumor rna libraries",
-                  "Condition": "{% $tags.tumorRnaFastqRgidList ? true : false %}"
+                  "Condition": "{% $exists($tags.tumorRnaFastqRgidList) ? true : false %}"
                 }
               ],
               "Default": "Get fastq list rgids from tumor rna libraries"
