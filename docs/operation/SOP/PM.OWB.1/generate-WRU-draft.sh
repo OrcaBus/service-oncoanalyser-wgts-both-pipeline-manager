@@ -708,7 +708,7 @@ lambda_payload="$( \
             "engineParameters": $engineParameters
           }
         }
-      end
+      end |
       # If we have input data
       if $inputData then
         # Initialise payload if not set
