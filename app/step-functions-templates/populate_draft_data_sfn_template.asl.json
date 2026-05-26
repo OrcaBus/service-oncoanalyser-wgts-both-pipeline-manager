@@ -834,7 +834,7 @@
                       "Choices": [
                         {
                           "Next": "Get tumor dna inputs from portal run id",
-                          "Condition": "{% $tags.tumorDnaFastqRgidList ? true : false %}"
+                          "Condition": "{% $tags.tumorDnaLibraryId ? true : false %}"
                         }
                       ],
                       "Default": "Pass"
