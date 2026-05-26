@@ -641,25 +641,47 @@ fi
 echo_stderr "Generating engine parameters"
 engine_parameters=$( \
   jq --null-input --raw-output --compact-output \
-  --arg outputUriPrefix "${OUTPUT_URI_PREFIX}" \
-  --arg logsUriPrefix "${LOGS_URI_PREFIX}" \
-  --arg cacheUriPrefix "${CACHE_URI_PREFIX}" \
-  --arg projectId "${PROJECT_ID}" \
-  --arg portalRunId "${portal_run_id}" \
-  --arg analysisStorageSize "${ANALYSIS_STORAGE_SIZE}" \
-  '
-    # Get the engine parameters
-    {
-      "outputUri": ( if $outputUriPrefix != "" then ($outputUriPrefix + $portalRunId + "/") else "" end ),
-      "logsUri": ( if $logsUriPrefix != "" then ($logsUriPrefix + $portalRunId + "/") else "" end ),
-      "cacheUri": ( if $cacheUriPrefix != "" then ($cacheUriPrefix + $portalRunId + "/") else "" end ),
-      "projectId": $projectId,
-      "analysisStorageSize": $analysisStorageSize
-    } |
-    # Remove empty values
-    with_entries(select(.value != ""))
-  ' \
+    --arg outputUriPrefix "${OUTPUT_URI_PREFIX}" \
+    --arg logsUriPrefix "${LOGS_URI_PREFIX}" \
+    --arg cacheUriPrefix "${CACHE_URI_PREFIX}" \
+    --arg projectId "${PROJECT_ID}" \
+    --arg portalRunId "${portal_run_id}" \
+    --arg analysisStorageSize "${ANALYSIS_STORAGE_SIZE}" \
+    '
+      # Get the engine parameters
+      {
+        "outputUri": ( if $outputUriPrefix != "" then ($outputUriPrefix + $portalRunId + "/") else "" end ),
+        "logsUri": ( if $logsUriPrefix != "" then ($logsUriPrefix + $portalRunId + "/") else "" end ),
+        "cacheUri": ( if $cacheUriPrefix != "" then ($cacheUriPrefix + $portalRunId + "/") else "" end ),
+        "projectId": $projectId,
+        "analysisStorageSize": $analysisStorageSize
+      } |
+      # Remove empty values
+      with_entries(select(.value != ""))
+    ' \
 )
+
+# Check for existing input data
+if [[ -n "${INPUT_DATA_FILE}" ]]; then
+  # Check if input data file exists
+  if [[ ! -f "${INPUT_DATA_FILE}" ]]; then
+    echo_stderr "${INPUT_DATA_FILE} does not exist"
+    print_usage
+    exit 1
+  fi
+
+  # Check input data is in json format
+  if ! jq -e 'type == "object"' < "${INPUT_DATA_FILE}" >/dev/null 2>&1; then
+    echo_stderr "${INPUT_DATA_FILE} is not in json format"
+    print_usage
+    exit 1
+  fi
+
+  # Load in input data
+  input_data_json_str="$(jq < "${INPUT_DATA_FILE}")"
+else
+  input_data_json_str="null"
+fi
 
 # Generate the event
 lambda_payload="$( \
@@ -669,14 +691,15 @@ lambda_payload="$( \
     --arg portalRunId "${portal_run_id}" \
     --argjson libraries "${libraries}" \
     --argjson engineParameters "${engine_parameters}" \
+    --argjson inputData "${input_data_json_str}" \
     '
-    {
-      "status": "DRAFT",
-      "timestamp": (now | todateiso8601),
-      "workflow": $workflow,
-      "workflowRunName": ("umccr--manual--" + $workflow["name"] + "--" + ($workflow["version"] | gsub("\\."; "-")) + "--" + $portalRunId),
-      "portalRunId": $portalRunId,
-      "libraries": $libraries,
+      {
+        "status": "DRAFT",
+        "timestamp": (now | todateiso8601),
+        "workflow": $workflow,
+        "workflowRunName": ("umccr--manual--" + $workflow["name"] + "--" + ($workflow["version"] | gsub("\\."; "-")) + "--" + $portalRunId),
+        "portalRunId": $portalRunId,
+        "libraries": $libraries,
       } |
       if ( ($engineParameters | length) > 0 ) then
         .["payload"] = {
@@ -685,6 +708,22 @@ lambda_payload="$( \
             "engineParameters": $engineParameters
           }
         }
+      end
+      # If we have input data
+      if $inputData then
+        # Initialise payload if not set
+        if (.["payload"] | not) then
+          .["payload"] = {}
+        end |
+        # Set payload version
+        .["payload"]["version"] = $payloadVersion |
+        # If payload data already exists we need to merge
+        if .["payload"]["data"] then
+          .["payload"]["data"] = ($inputData * .["payload"]["data"])
+        # Otherwise just use the input json data
+        else
+          .["payload"]["data"] = $inputData
+        end
       end
     ' \
 )"
