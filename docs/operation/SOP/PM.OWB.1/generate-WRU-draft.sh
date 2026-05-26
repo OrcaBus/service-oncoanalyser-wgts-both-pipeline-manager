@@ -747,7 +747,7 @@ if [[ -n "${SAVE_DRAFT_PAYLOAD}" ]]; then
 fi
 
 # Set the trap
-trap 'rm -rf "${LAMBDA_TMP_DIR:-}"' EXIT
+trap 'if [[ -n "${LAMBDA_TMP_DIR:-}" ]]; then rm -rf -- "${LAMBDA_TMP_DIR}"; fi' EXIT
 
 # Push the event to EventBridge
 LAMBDA_TMP_DIR="$(mktemp -d "LAMBDA_TMP_DIR_XXXXXX")"
