@@ -187,9 +187,9 @@ def validate_inputs(
                     uri_iter_.startswith(f"s3://{environ[REF_DATA_BUCKET_ENV_VAR]}/") or
                     (
                         # Belongs to project prefix
-                        uri_iter_.startswith(project_prefix) and
-                        # File not a folder
-                        not uri_iter_.endswith("/")
+                            uri_iter_.startswith(project_prefix) and
+                            # File not a folder
+                            not uri_iter_.endswith("/")
                     )
             )
         ),
@@ -203,7 +203,7 @@ def validate_inputs(
             project_data_obj = coerce_data_id_or_uri_to_project_data_obj(
                 data_id_or_uri=data_uri,
             )
-        except ValueError as e:
+        except (ValueError, NotADirectoryError) as e:
             return False, f"Data uri '{data_uri}' cannot be found in the project context '{project_id}'"
 
         # Then try get it in this context
