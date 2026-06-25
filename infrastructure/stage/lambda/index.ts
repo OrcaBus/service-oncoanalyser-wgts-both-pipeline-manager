@@ -6,7 +6,13 @@ import {
   lambdaRequirementsMap,
 } from './interfaces';
 import { PythonUvFunction } from '@orcabus/platform-cdk-constructs/lambda';
-import { LAMBDA_DIR, SCHEMA_REGISTRY_NAME, SSM_SCHEMA_ROOT, WORKFLOW_NAME } from '../constants';
+import {
+  DEFAULT_PAYLOAD_VERSION,
+  LAMBDA_DIR,
+  SCHEMA_REGISTRY_NAME,
+  SSM_SCHEMA_ROOT,
+  WORKFLOW_NAME,
+} from '../constants';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Duration } from 'aws-cdk-lib';
 import { NagSuppressions } from 'cdk-nag';
@@ -104,6 +110,7 @@ function buildLambda(scope: Construct, props: LambdaInputProps): LambdaObject {
   // Needs Workflow Env vars
   if (lambdaRequirements.needsWorkflowEnvVars) {
     lambdaFunction.addEnvironment('WORKFLOW_NAME', WORKFLOW_NAME);
+    lambdaFunction.addEnvironment('DEFAULT_PAYLOAD_VERSION', DEFAULT_PAYLOAD_VERSION);
   }
 
   // Needs bucket env vars
