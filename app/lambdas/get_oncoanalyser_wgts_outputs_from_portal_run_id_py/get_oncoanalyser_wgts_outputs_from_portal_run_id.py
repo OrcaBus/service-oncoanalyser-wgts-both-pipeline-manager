@@ -60,7 +60,7 @@ TUMOR_DNA: TumorDnaInputs = {
     "reduxJitterTsv": f"{{DNA_MIDFIX}}/alignments/dna/{{TUMOR_DNA_LIBRARY_ID}}.jitter_params.tsv",
     "reduxMsTsv": f"{{DNA_MIDFIX}}/alignments/dna/{{TUMOR_DNA_LIBRARY_ID}}.ms_table.tsv.gz",
     "bamtoolsDir": f"{{DNA_MIDFIX}}/bamtools/{{TUMOR_DNA_LIBRARY_ID}}/",
-    "sageDir": f"{{DNA_MIDFIX}}/sage_calling/somatic/",
+    "sageDir": f"{{DNA_MIDFIX}}/sage/somatic/",
     "linxAnnoDir": f"{{DNA_MIDFIX}}/linx/somatic_annotations/",
     "linxPlotDir": f"{{DNA_MIDFIX}}/linx/somatic_plots/",
     "purpleDir": f"{{DNA_MIDFIX}}/purple/",
@@ -74,7 +74,7 @@ NORMAL_DNA: NormalDnaInputs = {
     "reduxJitterTsv": f"{{DNA_MIDFIX}}/alignments/dna/{{NORMAL_DNA_LIBRARY_ID}}.jitter_params.tsv",
     "reduxMsTsv": f"{{DNA_MIDFIX}}/alignments/dna/{{NORMAL_DNA_LIBRARY_ID}}.ms_table.tsv.gz",
     "bamtoolsDir": f"{{DNA_MIDFIX}}/bamtools/{{NORMAL_DNA_LIBRARY_ID}}/",
-    "sageDir": f"{{DNA_MIDFIX}}/sage_calling/germline/",
+    "sageDir": f"{{DNA_MIDFIX}}/sage/germline/",
     "linxAnnoDir": f"{{DNA_MIDFIX}}/linx/germline_annotations/",
 }
 
