@@ -336,12 +336,16 @@ def handle_templates_by_version(portal_run_id: str) -> Tuple:
     tumor_dna = TUMOR_DNA.copy()
     normal_dna = NORMAL_DNA.copy()
 
-    # Get oncoanalyser version
-    if Version(workflow_run_obj['workflow']['version']) < Version('2.2.0'):
-        tumor_dna['sageDir'] = f"{{DNA_MIDFIX}}/sage/somatic/"
-        normal_dna['sageDir'] = f"{{DNA_MIDFIX}}/sage/germline/"
+    # If oncoanalyser version is between 2.2.0 and 2.3.0
+    # We need to update the sageDir output directory
+    if (
+            Version('2.2.0') <= Version(workflow_run_obj['workflow']['version']) < Version('2.3.0')
+    ):
+        tumor_dna['sageDir'] = f"{{DNA_MIDFIX}}/sage_calling/somatic/"
+        normal_dna['sageDir'] = f"{{DNA_MIDFIX}}/sage_calling/germline/"
 
     # Bamtools directory updated in version 2.3.0
+    # Sage calling also temporarily changed in 2.2.0
     if Version(workflow_run_obj['workflow']['version']) < Version('2.3.0'):
         tumor_dna['bamtoolsDir'] = f"{{DNA_MIDFIX}}/bamtools/{{DNA_MIDFIX}}_{{TUMOR_DNA_LIBRARY_ID}}_bamtools/"
         normal_dna['bamtoolsDir'] = f"{{DNA_MIDFIX}}/bamtools/{{DNA_MIDFIX}}_{{NORMAL_DNA_LIBRARY_ID}}_bamtools/"
