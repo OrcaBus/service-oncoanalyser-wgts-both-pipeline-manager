@@ -88,6 +88,12 @@ def handler(event, context):
     ):
         payload['data']['inputs']['tumorRnaInputs'] = oncoanalyser_wgts_tumor_rna_inputs
 
+    # Remove nulls from inputs
+    payload['data']['inputs'] = dict(filter(
+        lambda kv_iter_: kv_iter_[1] is not None,
+        payload['data']['inputs'].items()
+    ))
+
     # Merge the data from the dragen draft payload into the oncoanalyser draft payload
     new_data_object = payload['data'].copy()
     if new_data_object.get("inputs", None) is None:
