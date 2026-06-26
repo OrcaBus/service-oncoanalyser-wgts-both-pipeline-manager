@@ -59,7 +59,7 @@ TUMOR_DNA: TumorDnaInputs = {
     "bamRedux": f"{{DNA_MIDFIX}}/alignments/dna/{{TUMOR_DNA_LIBRARY_ID}}.redux.bam",
     "reduxJitterTsv": f"{{DNA_MIDFIX}}/alignments/dna/{{TUMOR_DNA_LIBRARY_ID}}.jitter_params.tsv",
     "reduxMsTsv": f"{{DNA_MIDFIX}}/alignments/dna/{{TUMOR_DNA_LIBRARY_ID}}.ms_table.tsv.gz",
-    "bamtoolsDir": f"{{DNA_MIDFIX}}/bamtools/{{DNA_MIDFIX}}_{{TUMOR_DNA_LIBRARY_ID}}_bamtools/",
+    "bamtoolsDir": f"{{DNA_MIDFIX}}/bamtools/{{TUMOR_DNA_LIBRARY_ID}}_bamtools/",
     "sageDir": f"{{DNA_MIDFIX}}/sage_calling/somatic/",
     "linxAnnoDir": f"{{DNA_MIDFIX}}/linx/somatic_annotations/",
     "linxPlotDir": f"{{DNA_MIDFIX}}/linx/somatic_plots/",
@@ -73,7 +73,7 @@ NORMAL_DNA: NormalDnaInputs = {
     "bamRedux": f"{{DNA_MIDFIX}}/alignments/dna/{{NORMAL_DNA_LIBRARY_ID}}.redux.bam",
     "reduxJitterTsv": f"{{DNA_MIDFIX}}/alignments/dna/{{NORMAL_DNA_LIBRARY_ID}}.jitter_params.tsv",
     "reduxMsTsv": f"{{DNA_MIDFIX}}/alignments/dna/{{NORMAL_DNA_LIBRARY_ID}}.ms_table.tsv.gz",
-    "bamtoolsDir": f"{{DNA_MIDFIX}}/bamtools/{{DNA_MIDFIX}}_{{NORMAL_DNA_LIBRARY_ID}}_bamtools/",
+    "bamtoolsDir": f"{{DNA_MIDFIX}}/bamtools/{{NORMAL_DNA_LIBRARY_ID}}_bamtools/",
     "sageDir": f"{{DNA_MIDFIX}}/sage_calling/germline/",
     "linxAnnoDir": f"{{DNA_MIDFIX}}/linx/germline_annotations/",
 }
@@ -338,8 +338,13 @@ def handle_templates_by_version(portal_run_id: str) -> Tuple:
 
     # Get oncoanalyser version
     if Version(workflow_run_obj['workflow']['version']) < Version('2.2.0'):
-        TUMOR_DNA['sageDir'] = f"{{DNA_MIDFIX}}/sage/somatic/"
-        NORMAL_DNA['sageDir'] = f"{{DNA_MIDFIX}}/sage/germline/"
+        tumor_dna['sageDir'] = f"{{DNA_MIDFIX}}/sage/somatic/"
+        normal_dna['sageDir'] = f"{{DNA_MIDFIX}}/sage/germline/"
+
+    # Bamtools directory updated in version 2.3.0
+    if Version(workflow_run_obj['workflow']['version']) < Version('2.3.0'):
+        tumor_dna['bamtoolsDir'] = f"{{DNA_MIDFIX}}/bamtools/{{DNA_MIDFIX}}_{{TUMOR_DNA_LIBRARY_ID}}_bamtools/"
+        normal_dna['bamtoolsDir'] = f"{{DNA_MIDFIX}}/bamtools/{{DNA_MIDFIX}}_{{NORMAL_DNA_LIBRARY_ID}}_bamtools/"
 
     return tumor_dna, normal_dna
 
