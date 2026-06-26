@@ -102,6 +102,7 @@ export const DEFAULT_WORKFLOW_INPUTS_BY_VERSION_MAP: Record<WorkflowVersionType,
     genomeVersion: '38',
     genomeType: 'alt',
     forceGenome: true,
+    processesList: DEFAULT_PROCESSES_LIST,
   },
 };
 
