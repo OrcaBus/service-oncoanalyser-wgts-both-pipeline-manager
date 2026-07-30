@@ -12,24 +12,24 @@ export type StateMachineName =
   | 'glueSucceededEventsToDraftUpdate'
   // Draft populator
   | 'populateDraftData'
-  // Validate draft to ready
-  | 'validateDraftToReady'
+  // Validate draft data and put ready event
+  | 'validateDraftDataAndPutReadyEvent'
   // Ready-to-Submitted
   | 'readyEventToIcav2WesRequestEvent'
   // Post-submission event conversion
-  | 'icav2WesAscEventToWorkflowRscEvent';
+  | 'icav2WesEventToWrscEvent';
 
 export const stateMachineNameList: StateMachineName[] = [
   // Glue code
   'glueSucceededEventsToDraftUpdate',
   // Draft populator
   'populateDraftData',
-  // Validate draft to ready
-  'validateDraftToReady',
+  // Validate draft data and put ready event
+  'validateDraftDataAndPutReadyEvent',
   // Ready-to-Submitted
   'readyEventToIcav2WesRequestEvent',
   // Post-submission event conversion
-  'icav2WesAscEventToWorkflowRscEvent',
+  'icav2WesEventToWrscEvent',
 ];
 
 // Requirements interface for Step Functions
@@ -67,8 +67,8 @@ export const stepFunctionsRequirementsMap: Record<StateMachineName, StepFunction
     needsEventPutPermission: true,
     needsSsmParameterStoreAccess: true,
   },
-  // Validate draft to ready
-  validateDraftToReady: {
+  // Validate draft data and put ready event
+  validateDraftDataAndPutReadyEvent: {
     needsEventPutPermission: true,
   },
   // Ready-to-Submitted
@@ -76,7 +76,7 @@ export const stepFunctionsRequirementsMap: Record<StateMachineName, StepFunction
     needsEventPutPermission: true,
   },
   // Post-submission event conversion
-  icav2WesAscEventToWorkflowRscEvent: {
+  icav2WesEventToWrscEvent: {
     needsEventPutPermission: true,
   },
 };
@@ -96,6 +96,7 @@ export const stepFunctionToLambdasMap: Record<StateMachineName, LambdaName[]> = 
     'getOncoanalyserWgtsOutputsFromPortalRunId',
     'generateWruEventObjectWithMergedData',
     'comparePayload',
+    'getMissingSchemaFields',
     'getWorkflowRunObject',
     'findLatestWorkflow',
     'getDraftPayload',
@@ -104,20 +105,25 @@ export const stepFunctionToLambdasMap: Record<StateMachineName, LambdaName[]> = 
     'getFastqRgidsFromLibraryId',
     'getMetadataTags',
     'getFastqIdListFromRgidList',
+    // Commentary
+    'addPopulateDraftComment',
     // Validation
     'validateDraftDataCompleteSchema',
   ],
-  validateDraftToReady: [
+  validateDraftDataAndPutReadyEvent: [
     // Validation
     'validateDraftDataCompleteSchema',
     'postSchemaValidation',
   ],
   readyEventToIcav2WesRequestEvent: [
+    // Commentary lambdas
+    'addReadyComment',
     // Ready to ICAv2 WES lambdas
     'convertReadyEventInputsToIcav2WesEventInputs',
   ],
-  icav2WesAscEventToWorkflowRscEvent: [
+  icav2WesEventToWrscEvent: [
     // ICAv2 WES to WRSC Event lambdas
     'convertIcav2WesEventToWrscEvent',
+    'addWesFailureComment',
   ],
 };
