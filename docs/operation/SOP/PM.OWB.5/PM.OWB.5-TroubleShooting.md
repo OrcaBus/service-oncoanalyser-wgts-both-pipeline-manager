@@ -21,7 +21,6 @@ then click on the offending Step Function link in the Slack message to be taken 
   - [Missing Upstream Outputs](#missing-upstream-outputs)
   - [Mismatched Sample IDs](#mismatched-sample-ids)
 
-
 ## Analysis Stuck in DRAFT state
 
 If the analysis is stuck in DRAFT mode, there may be a couple of reasons for this.
@@ -69,14 +68,16 @@ The ICAv2 WES Manager may fail to create an analysis for any of the following re
 ### Project Not Set Up Correctly
 
 Common issues with new projects:
-* Ensure that the ICAv2 Production Service User has been added to the project with the correct permissions.
-* Ensure that the Notifications Channels have been set up correctly for the project.
+
+- Ensure that the ICAv2 Production Service User has been added to the project with the correct permissions.
+- Ensure that the Notifications Channels have been set up correctly for the project.
 
 ### Invalid Pipeline ID
 
 > The pipeline id specified is not available in the project id
 
 Mitigate with:
+
 ```shell
 icav2 projects enter <project_id>
 icav2 projectpipeline link <pipeline_id>
@@ -89,6 +90,7 @@ You will need to create a new workflow run after this change.
 > Data .x. is not available in the project id <project_id>
 
 If the upstream analysis outputs are not accessible in the ICAv2 project, you may need to:
+
 1. Confirm the output URIs from upstream pipelines exist in S3
 2. Ensure the data is linked to the ICAv2 project
 3. Consider re-running the upstream Oncoanalyser WGTS DNA or RNA pipeline if the data is missing
@@ -103,6 +105,7 @@ Check the analysis logs for memory-related failure messages.
 ### Missing Upstream Outputs
 
 If the pipeline fails because upstream outputs are not accessible:
+
 1. Verify the output URIs from both Oncoanalyser WGTS DNA and RNA are valid and accessible
 2. Check that both upstream runs completed successfully
 3. Confirm the output files have not been archived to Glacier
@@ -110,10 +113,10 @@ If the pipeline fails because upstream outputs are not accessible:
 ### Mismatched Sample IDs
 
 If the pipeline fails due to sample ID mismatches between DNA and RNA inputs:
+
 1. Verify the `linkedLibraries` in the DRAFT event contain the correct tumor DNA, normal DNA, and tumor RNA library IDs
 2. Confirm the upstream workflows processed the same subject/sample
 3. Check the metadata tags in the workflow run for consistency
-
 
 [aws_step_functions_console_prod]: https://472057503814.ap-southeast-2.console.aws.amazon.com/states/home?region=ap-southeast-2#/statemachines
 [sop_1_rel_path]: ../PM.OWB.1/PM.OWB.1-ManualPipelineExecution.md

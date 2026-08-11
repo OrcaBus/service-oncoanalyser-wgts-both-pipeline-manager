@@ -6,29 +6,31 @@
 There may be times where we need to deploy a new version of the Oncoanalyser WGTS Both pipeline.
 
 In the SOP below we discuss the following scenarios:
-* User wants to deploy a new version of the pipeline for testing purposes.
-* User wants to make a new release of the pipeline for production use.
+
+- User wants to deploy a new version of the pipeline for testing purposes.
+- User wants to make a new release of the pipeline for production use.
 
 Throughout the SOP we make the following expectations:
-* User is familiar with UMCCR's [cwl-ica repository][cwl_ica_repo] and has a working knowledge of CWL/Nextflow.
-* User has access to the ICAv2 platform with at minimum 'Contributor level' permissions in at least one project.
-* User has access to the appropriate AWS Account tied to the ICAv2 project.
 
-- [Pipeline Summary](#pipeline-summary)
-- [Setup](#setup)
-- [Development Deployment](#development-deployment)
+- User is familiar with UMCCR's [cwl-ica repository][cwl_ica_repo] and has a working knowledge of CWL/Nextflow.
+- User has access to the ICAv2 platform with at minimum 'Contributor level' permissions in at least one project.
+- User has access to the appropriate AWS Account tied to the ICAv2 project.
+
+* [Pipeline Summary](#pipeline-summary)
+* [Setup](#setup)
+* [Development Deployment](#development-deployment)
   - [Pipeline Creation](#pipeline-creation)
   - [Running the Pipeline](#running-the-pipeline)
-- [Production Deployment](#production-deployment)
+* [Production Deployment](#production-deployment)
   - [GitHub Releases](#github-releases)
   - [Infrastructure Constants Updates](#infrastructure-constants-updates)
   - [Workflow Manager Updates](#workflow-manager-updates)
   - [Analysis Glue Updates](#analysis-glue-updates)
 
-
 ## Pipeline Summary
 
 The Oncoanalyser WGTS Both pipeline runs on ICAv2 using CWL/Nextflow. It performs combined somatic DNA+RNA analysis including:
+
 - Joint variant interpretation (PURPLE with RNA support)
 - Fusion prioritisation (LINX with RNA evidence)
 - Cancer-of-origin prediction (CUPPA)
@@ -39,6 +41,7 @@ This pipeline integrates results from both upstream Oncoanalyser WGTS DNA and On
 ## Setup
 
 Ensure you have:
+
 - ICAv2 CLI installed and configured
 - AWS credentials for the target environment
 - Access to the OrcaBus Portal
@@ -61,14 +64,14 @@ Run the pipeline on a test dataset using [SOP 1][sop_1_rel_path], providing the 
 
 ```json5
 {
-  "payload": {
-    "version": "<DEFAULT_PAYLOAD_VERSION>",
-    "data": {
-      "engineParameters": {
-        "pipelineId": "<THE PIPELINE ID YOU JUST CREATED>"
-      }
-    }
-  }
+  payload: {
+    version: '<DEFAULT_PAYLOAD_VERSION>',
+    data: {
+      engineParameters: {
+        pipelineId: '<THE PIPELINE ID YOU JUST CREATED>',
+      },
+    },
+  },
 }
 ```
 
@@ -102,7 +105,6 @@ make-new-workflow.sh \
 ### Analysis Glue Updates
 
 Update the [analysis-glue repository][analysis_glue_repo_link] constants to include the new workflow version.
-
 
 [cwl_ica_repo]: https://github.com/umccr/cwl-ica
 [sop_1_rel_path]: ../PM.OWB.1/PM.OWB.1-ManualPipelineExecution.md
