@@ -46,7 +46,7 @@
     "Add comment for WES failure": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
-      "Output": "{% $states.result.Payload %}",
+      "Output": "{% $states.input %}",
       "Arguments": {
         "FunctionName": "${__add_wes_failure_comment_lambda_function_arn__}",
         "Payload": {
