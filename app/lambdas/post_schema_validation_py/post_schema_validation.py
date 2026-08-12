@@ -364,7 +364,18 @@ def handler(event, context) -> Dict[str, bool]:
         )
         return {"isValid": False}
 
-    project_prefix = cast(str, get_s3_key_prefix_by_project_id(project_id))
+    try:
+        project_prefix = cast(str, get_s3_key_prefix_by_project_id(project_id))
+    except ApiException:
+        add_comment_to_workflow_run(
+            workflow_run_orcabus_id=workflow_run_id,
+            comment=_format_comment_with_arn(
+                f"Post schema validation failed: cannot resolve S3 key prefix for projectId '{project_id}'",
+                execution_arn,
+            ),
+            author=COMMENT_AUTHOR,
+        )
+        return {"isValid": False}
 
     # Collect all failures
     all_failures: List[str] = []
