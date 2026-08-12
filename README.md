@@ -99,9 +99,8 @@ When an upstream Oncoanalyser WGTS DNA or RNA pipeline succeeds, this state mach
 
 | DetailType | Source | Description |
 |---|---|---|
-| `WorkflowRunStateChange` | `orcabus.workflowmanager` | DRAFT and READY workflow run records |
+| `WorkflowRunStateChange` | `orcabus.workflowmanager` | DRAFT/READY records for this service, and upstream SUCCEEDED events (oncoanalyser-wgts-dna, oncoanalyser-wgts-rna) |
 | `Icav2WesAnalysisStateChange` | `orcabus.icav2wesmanager` | ICAv2 analysis state updates |
-| `WorkflowRunStateChange` | `orcabus.workflowmanager` | Upstream SUCCEEDED events (oncoanalyser-wgts-dna, oncoanalyser-wgts-rna) |
 
 ### Published Events
 
