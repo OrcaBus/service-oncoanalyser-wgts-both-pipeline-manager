@@ -12,9 +12,8 @@ In the SOP below we discuss the following scenarios:
 
 Throughout the SOP we make the following expectations:
 
-- User is familiar with UMCCR's [cwl-ica repository][cwl_ica_repo] and has a working knowledge of CWL/Nextflow.
-- User has access to the ICAv2 platform with at minimum 'Contributor level' permissions in at least one project.
-- User has access to the appropriate AWS Account tied to the ICAv2 project.
+* User has access to the ICAv2 platform with at minimum 'Contributor level' permissions in at least one project.
+* User has access to the appropriate AWS Account tied to the ICAv2 project.
 
 * [Pipeline Summary](#pipeline-summary)
 * [Setup](#setup)
@@ -29,7 +28,7 @@ Throughout the SOP we make the following expectations:
 
 ## Pipeline Summary
 
-The Oncoanalyser WGTS Both pipeline runs on ICAv2 using CWL/Nextflow. It performs combined somatic DNA+RNA analysis including:
+The Oncoanalyser WGTS Both pipeline runs on ICAv2 using Nextflow. It performs combined somatic DNA+RNA analysis including:
 
 - Joint variant interpretation (PURPLE with RNA support)
 - Fusion prioritisation (LINX with RNA evidence)
@@ -46,17 +45,30 @@ Ensure you have:
 - AWS credentials for the target environment
 - Access to the OrcaBus Portal
 
+
 ## Development Deployment
 
 ### Pipeline Creation
 
-1. Package the workflow into a ZIP file for deployment into ICA.
-2. Deploy into the development ICAv2 project:
+#### From nf-core
+
+1. Deploy into the development ICAv2 project:
    ```shell
    icav2 projects enter development
-   icav2 projectpipelines create-cwl-pipeline-from-zip <workflow-zip>
+   icav2 projectpipelines create-nextflow-pipeline-from-nf-core oncoanalyser --revision 2.3.0
    ```
-3. Keep note of the pipeline ID.
+2. Keep note of the pipeline ID.
+
+#### From GitHub
+
+1. Clone the GitHub repository for the pipeline you wish to deploy.
+2. Package the cloned directory into a ZIP file for deployment into ICA.
+3. Deploy into the development ICAv2 project:
+   ```shell
+   icav2 projects enter development
+   icav2 projectpipelines create-nextflow-pipeline-from-zip <workflow-zip>
+   ```
+4. Keep note of the pipeline ID.
 
 ### Running the Pipeline
 
@@ -64,25 +76,27 @@ Run the pipeline on a test dataset using [SOP 1][sop_1_rel_path], providing the 
 
 ```json5
 {
-  payload: {
-    version: '<DEFAULT_PAYLOAD_VERSION>',
-    data: {
-      engineParameters: {
-        pipelineId: '<THE PIPELINE ID YOU JUST CREATED>',
-      },
-    },
-  },
+  "payload": {
+    "version": "<DEFAULT_PAYLOAD_VERSION>",
+    "data": {
+      "engineParameters": {
+        "pipelineId": "<THE PIPELINE ID YOU JUST CREATED>"
+      }
+    }
+  }
 }
 ```
 
-Note: Both upstream pipelines (Oncoanalyser WGTS DNA and Oncoanalyser WGTS RNA) must have completed successfully before the DRAFT event can be fully populated and promoted to READY.
-
 ## Production Deployment
 
-### GitHub Releases
+### Pipeline linking
 
-1. Push CWL changes to a branch, get reviewed and merged to main.
-2. Create a new workflow release via the cwl-ica CLI.
+We can link pipelines from one project to another.
+
+```bash
+icav2 projects enter production
+icav2 projectpipeline link <pipeline-id>
+```
 
 ### Infrastructure Constants Updates
 
@@ -98,7 +112,7 @@ make-new-workflow.sh \
   --workflow-version "<version>" \
   --executionEngine "ICA" \
   --executionEnginePipelineId "<pipeline-id>" \
-  --codeVersion "$(cd <cwl-ica-repo> && git rev-parse --short=7 HEAD)" \
+  --codeVersion "$(cd <nf-repo> && git rev-parse --short=7 HEAD)" \
   --validationState "VALIDATED"
 ```
 
@@ -106,6 +120,6 @@ make-new-workflow.sh \
 
 Update the [analysis-glue repository][analysis_glue_repo_link] constants to include the new workflow version.
 
-[cwl_ica_repo]: https://github.com/umccr/cwl-ica
-[sop_1_rel_path]: ../PM.OWB.1/PM.OWB.1-ManualPipelineExecution.md
+
+[sop_1_rel_path]: ../PM.OWD.1/PM.OWD.1-ManualPipelineExecution.md
 [analysis_glue_repo_link]: https://github.com/OrcaBus/service-analysis-glue
