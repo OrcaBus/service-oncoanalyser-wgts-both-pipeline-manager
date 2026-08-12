@@ -167,6 +167,12 @@ def validate_engine_parameters(
             f"logsUri '{logs_uri}' does not end with '/{LOGS_MIDFIX}/{WORKFLOW_NAME}/{portal_run_id}/'"
         )
 
+    # Validate cacheUri ends with /cache/<workflow-name>/<portal-run-id>/
+    if cache_uri and not cache_uri.endswith(f"/cache/{WORKFLOW_NAME}/{portal_run_id}/"):
+        failures.append(
+            f"cacheUri '{cache_uri}' does not end with '/cache/{WORKFLOW_NAME}/{portal_run_id}/'"
+        )
+
     # Confirm the pipeline is accessible in the project
     try:
         _ = get_project_pipeline_obj(
