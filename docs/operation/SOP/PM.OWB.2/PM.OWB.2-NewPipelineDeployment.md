@@ -12,15 +12,15 @@ In the SOP below we discuss the following scenarios:
 
 Throughout the SOP we make the following expectations:
 
-* User has access to the ICAv2 platform with at minimum 'Contributor level' permissions in at least one project.
-* User has access to the appropriate AWS Account tied to the ICAv2 project.
+- User has access to the ICAv2 platform with at minimum 'Contributor level' permissions in at least one project.
+- User has access to the appropriate AWS Account tied to the ICAv2 project.
 
-* [Pipeline Summary](#pipeline-summary)
-* [Setup](#setup)
-* [Development Deployment](#development-deployment)
+- [Pipeline Summary](#pipeline-summary)
+- [Setup](#setup)
+- [Development Deployment](#development-deployment)
   - [Pipeline Creation](#pipeline-creation)
   - [Running the Pipeline](#running-the-pipeline)
-* [Production Deployment](#production-deployment)
+- [Production Deployment](#production-deployment)
   - [GitHub Releases](#github-releases)
   - [Infrastructure Constants Updates](#infrastructure-constants-updates)
   - [Workflow Manager Updates](#workflow-manager-updates)
@@ -44,7 +44,6 @@ Ensure you have:
 - ICAv2 CLI installed and configured
 - AWS credentials for the target environment
 - Access to the OrcaBus Portal
-
 
 ## Development Deployment
 
@@ -76,14 +75,14 @@ Run the pipeline on a test dataset using [SOP 1][sop_1_rel_path], providing the 
 
 ```json5
 {
-  "payload": {
-    "version": "<DEFAULT_PAYLOAD_VERSION>",
-    "data": {
-      "engineParameters": {
-        "pipelineId": "<THE PIPELINE ID YOU JUST CREATED>"
-      }
-    }
-  }
+  payload: {
+    version: '<DEFAULT_PAYLOAD_VERSION>',
+    data: {
+      engineParameters: {
+        pipelineId: '<THE PIPELINE ID YOU JUST CREATED>',
+      },
+    },
+  },
 }
 ```
 
@@ -119,7 +118,6 @@ make-new-workflow.sh \
 ### Analysis Glue Updates
 
 Update the [analysis-glue repository][analysis_glue_repo_link] constants to include the new workflow version.
-
 
 [sop_1_rel_path]: ../PM.OWD.1/PM.OWD.1-ManualPipelineExecution.md
 [analysis_glue_repo_link]: https://github.com/OrcaBus/service-analysis-glue
