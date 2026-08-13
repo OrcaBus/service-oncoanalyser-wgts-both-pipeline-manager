@@ -19,7 +19,7 @@ Performs the following steps:
 * On success: return {"isValid": true}
 """
 # Imports
-from typing import Dict, Tuple, cast, List
+from typing import Dict, Tuple, List
 import logging
 from os import environ
 from time import sleep
@@ -365,12 +365,23 @@ def handler(event, context) -> Dict[str, bool]:
         return {"isValid": False}
 
     try:
-        project_prefix = cast(str, get_s3_key_prefix_by_project_id(project_id))
+        project_prefix = get_s3_key_prefix_by_project_id(project_id)
     except ApiException:
         add_comment_to_workflow_run(
             workflow_run_orcabus_id=workflow_run_id,
             comment=_format_comment_with_arn(
                 f"Post schema validation failed: cannot resolve S3 key prefix for projectId '{project_id}'",
+                execution_arn,
+            ),
+            author=COMMENT_AUTHOR,
+        )
+        return {"isValid": False}
+
+    if project_prefix is None:
+        add_comment_to_workflow_run(
+            workflow_run_orcabus_id=workflow_run_id,
+            comment=_format_comment_with_arn(
+                f"Post schema validation failed: no S3 key prefix configured for projectId '{project_id}'",
                 execution_arn,
             ),
             author=COMMENT_AUTHOR,
