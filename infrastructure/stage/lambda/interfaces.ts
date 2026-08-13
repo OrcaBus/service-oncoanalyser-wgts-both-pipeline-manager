@@ -2,128 +2,153 @@ import { PythonUvFunction } from '@orcabus/platform-cdk-constructs/lambda';
 
 export type LambdaName =
   // Shared pre-ready lambdas
-  | 'getOncoanalyserWgtsOutputsFromPortalRunId'
-  | 'generateWruEventObjectWithMergedData'
   | 'comparePayload'
-  | 'getWorkflowRunObject'
-  | 'findLatestWorkflow'
   | 'getDraftPayload'
-  // Glue upstream
-  // Draft to ready
-  | 'getLibraries'
-  | 'getFastqRgidsFromLibraryId'
-  | 'getMetadataTags'
+  | 'findLatestWorkflow'
+  | 'getOncoanalyserWgtsOutputsFromPortalRunId'
+  | 'getWorkflowRunObject'
+  | 'generateWruEventObjectWithMergedData'
+  | 'getMissingSchemaFields'
+  | 'getLatestPayloadFromPortalRunId'
+  // Glue lambdas
+  // Draft Builder lambdas
   | 'getFastqIdListFromRgidList'
-  // Validation
+  | 'getFastqRgidsFromLibraryId'
+  | 'getLibraries'
+  | 'getMetadataTags'
+  // Validation lambdas
   | 'postSchemaValidation'
   | 'validateDraftDataCompleteSchema'
+  // Commentary lambdas
+  | 'addPopulateDraftComment'
+  | 'addReadyComment'
   // Ready to ICAv2 WES lambdas
   | 'convertReadyEventInputsToIcav2WesEventInputs'
   // ICAv2 WES to WRSC Event lambdas
-  | 'convertIcav2WesEventToWrscEvent';
+  | 'convertIcav2WesEventToWrscEvent'
+  | 'addWesFailureComment';
 
 export const lambdaNameList: LambdaName[] = [
   // Shared pre-ready lambdas
-  'getOncoanalyserWgtsOutputsFromPortalRunId',
-  'generateWruEventObjectWithMergedData',
   'comparePayload',
-  'getWorkflowRunObject',
-  'findLatestWorkflow',
   'getDraftPayload',
-  // Glue upstream
-  // Draft to ready
-  'getLibraries',
-  'getFastqRgidsFromLibraryId',
-  'getMetadataTags',
+  'findLatestWorkflow',
+  'getOncoanalyserWgtsOutputsFromPortalRunId',
+  'getWorkflowRunObject',
+  'generateWruEventObjectWithMergedData',
+  'getMissingSchemaFields',
+  'getLatestPayloadFromPortalRunId',
+  // Glue lambdas
+  // Draft Builder lambdas
   'getFastqIdListFromRgidList',
-  // Validation
+  'getFastqRgidsFromLibraryId',
+  'getLibraries',
+  'getMetadataTags',
+  // Validation lambdas
   'postSchemaValidation',
   'validateDraftDataCompleteSchema',
+  // Commentary lambdas
+  'addPopulateDraftComment',
+  'addReadyComment',
   // Ready to ICAv2 WES lambdas
   'convertReadyEventInputsToIcav2WesEventInputs',
   // ICAv2 WES to WRSC Event lambdas
   'convertIcav2WesEventToWrscEvent',
+  'addWesFailureComment',
 ];
 
 // Requirements interface for Lambda functions
 export interface LambdaRequirements {
   needsOrcabusApiTools?: boolean;
   needsIcav2Tools?: boolean;
+  needsHigherMemory?: boolean;
   needsSsmParametersAccess?: boolean;
   needsSchemaRegistryAccess?: boolean;
-  needsWorkflowEnvVars?: boolean;
-  needsBucketEnvVars?: boolean;
-  needsHigherMemory?: boolean;
+  needsExternalBucketInfo?: boolean;
+  needsWorkflowInfo?: boolean;
+  needsRepoUrl?: boolean;
 }
 
 // Lambda requirements mapping
 export const lambdaRequirementsMap: Record<LambdaName, LambdaRequirements> = {
   // Shared pre-ready lambdas
-  getOncoanalyserWgtsOutputsFromPortalRunId: {
-    needsOrcabusApiTools: true,
-  },
-  generateWruEventObjectWithMergedData: {
-    needsOrcabusApiTools: true,
-  },
   comparePayload: {},
-  getWorkflowRunObject: {
+  getDraftPayload: {
     needsOrcabusApiTools: true,
   },
   findLatestWorkflow: {
     needsOrcabusApiTools: true,
   },
-  getDraftPayload: {
+  getOncoanalyserWgtsOutputsFromPortalRunId: {
     needsOrcabusApiTools: true,
   },
-  // Glue upstream
-  // Draft to ready
-  getLibraries: {
+  getWorkflowRunObject: {
+    needsOrcabusApiTools: true,
+  },
+  generateWruEventObjectWithMergedData: {
+    needsOrcabusApiTools: true,
+  },
+  getMissingSchemaFields: {
+    needsSchemaRegistryAccess: true,
+    needsSsmParametersAccess: true,
+  },
+  getLatestPayloadFromPortalRunId: {
+    needsOrcabusApiTools: true,
+  },
+  // Glue lambdas
+  // Draft Builder lambdas
+  getFastqIdListFromRgidList: {
     needsOrcabusApiTools: true,
   },
   getFastqRgidsFromLibraryId: {
     needsOrcabusApiTools: true,
   },
+  getLibraries: {
+    needsOrcabusApiTools: true,
+  },
   getMetadataTags: {
     needsOrcabusApiTools: true,
   },
-  getFastqIdListFromRgidList: {
-    needsOrcabusApiTools: true,
-  },
-  // Validation
+  // Validation lambdas
   postSchemaValidation: {
     needsOrcabusApiTools: true,
-    needsWorkflowEnvVars: true,
-    needsBucketEnvVars: true,
+    needsWorkflowInfo: true,
+    needsExternalBucketInfo: true,
     needsIcav2Tools: true,
-    needsHigherMemory: true,
   },
   validateDraftDataCompleteSchema: {
     needsOrcabusApiTools: true,
     needsSchemaRegistryAccess: true,
     needsSsmParametersAccess: true,
-    needsWorkflowEnvVars: true,
+    needsWorkflowInfo: true,
   },
-  // Convert ready to ICAv2 WES Event - no requirements
-  convertReadyEventInputsToIcav2WesEventInputs: {
-    needsHigherMemory: true,
+  // Commentary lambdas
+  addPopulateDraftComment: {
+    needsOrcabusApiTools: true,
+    needsWorkflowInfo: true,
+    needsRepoUrl: true,
   },
-  // Needs OrcaBus toolkit to get the wrsc event
+  addReadyComment: {
+    needsOrcabusApiTools: true,
+    needsWorkflowInfo: true,
+  },
+  // Ready to ICAv2 WES lambdas
+  convertReadyEventInputsToIcav2WesEventInputs: {},
+  // ICAv2 WES to WRSC Event lambdas
   convertIcav2WesEventToWrscEvent: {
     needsOrcabusApiTools: true,
-    needsWorkflowEnvVars: true,
+    needsWorkflowInfo: true,
+  },
+  addWesFailureComment: {
+    needsOrcabusApiTools: true,
+    needsWorkflowInfo: true,
   },
 };
 
-export interface BuildLambdasProps {
-  refDataBucketName: string;
-  testDataBucketName: string;
-}
-
-export interface LambdaInputProps extends BuildLambdasProps {
+export interface LambdaInput {
   lambdaName: LambdaName;
 }
 
-export interface LambdaObject {
-  lambdaName: LambdaName;
+export interface LambdaObject extends LambdaInput {
   lambdaFunction: PythonUvFunction;
 }

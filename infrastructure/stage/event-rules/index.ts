@@ -88,7 +88,7 @@ function buildWorkflowManagerReadyEventPattern(): EventPattern {
 
 function buildEventRule(scope: Construct, props: EventBridgeRuleProps): Rule {
   return new events.Rule(scope, props.ruleName, {
-    ruleName: `${STACK_PREFIX}-${props.ruleName}`,
+    ruleName: `${STACK_PREFIX}--${props.ruleName}`,
     eventPattern: props.eventPattern,
     eventBus: props.eventBus,
   });
