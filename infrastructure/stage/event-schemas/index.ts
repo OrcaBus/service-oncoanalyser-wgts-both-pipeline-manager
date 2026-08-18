@@ -1,6 +1,7 @@
 import * as schemas from 'aws-cdk-lib/aws-eventschemas';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import {
+  DEFAULT_PAYLOAD_VERSION,
   EVENT_SCHEMAS_DIR,
   SCHEMA_REGISTRY_NAME,
   SSM_SCHEMA_ROOT,
@@ -15,11 +16,12 @@ import { payloadVersionList } from '../interfaces';
 
 export function buildSchema(scope: Construct, props: BuildSchemaProps): schemas.CfnSchema {
   // Import the schema file from the schemas directory
+  const kebabCaseName = camelCaseToKebabCase(props.schemaName);
   const schemaPath = path.join(
     EVENT_SCHEMAS_DIR,
-    camelCaseToKebabCase(props.schemaName),
+    kebabCaseName,
     props.payloadVersion,
-    'schema.json'
+    `${kebabCaseName}-schema.json`
   );
 
   // Create a new schema in the Event Schemas service
@@ -63,4 +65,10 @@ export function buildSchemas(scope: Construct) {
       }
     }
   }
+
+  // Create the default version pointer SSM parameter
+  new ssm.StringParameter(scope, 'completeDataDraft-default--ssm', {
+    parameterName: path.join(SSM_SCHEMA_ROOT, 'complete-data-draft', 'default'),
+    stringValue: DEFAULT_PAYLOAD_VERSION,
+  });
 }
