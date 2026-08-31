@@ -60,6 +60,14 @@ def handler(event, context):
     else:
         outputs = None
 
+    # Check if the status was FAILED, if so we populate the error message and type
+    if icav2_wes_event['status'] == 'FAILED':
+        error_type = icav2_wes_event.get('errorType', 'UnknownErrorType')
+        error_message_uri = icav2_wes_event.get('errorMessageUri', None)
+    else:
+        error_message_uri = None
+        error_type = None
+
     # Check for failures
     if icav2_wes_event.get('errorMessageUri', None) is not None:
         analysis_failure_type = icav2_wes_event.get('errorType')
@@ -111,5 +119,7 @@ def handler(event, context):
             },
             # Execution ID (ICAv2 analysis ID)
             **({"executionId": icav2_analysis_id} if icav2_analysis_id else {})
-        }
+        },
+        "errorMessageUri": error_message_uri,
+        "errorType": error_type,
     }
